@@ -14,9 +14,9 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="updates"
+        name="status"
         options={{
-          title: "Updates",
+          title: "Status",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="sync-outline" size={size} color={color} />
           )
