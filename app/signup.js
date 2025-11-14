@@ -1,8 +1,18 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Image, Alert } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  Alert,
+} from "react-native";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import api from "../utils/api";
 
 export default function Signup() {
@@ -40,7 +50,12 @@ export default function Signup() {
   };
 
   const handleSignup = async () => {
-    if (!user.email || !user.password || !user.confirm_password || !user.username) {
+    if (
+      !user.email ||
+      !user.password ||
+      !user.confirm_password ||
+      !user.username
+    ) {
       Alert.alert("Error", "Please fill all required fields");
       return;
     }
@@ -75,96 +90,132 @@ export default function Signup() {
       router.replace("/home");
     } catch (error) {
       console.log(error.response?.data || error);
-      Alert.alert("Signup Failed", error.response?.data?.message || "Try again!");
+      Alert.alert(
+        "Signup Failed",
+        error.response?.data?.message || "Try again!"
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <View className="flex-1 bg-white p-6">
-      <Text className="text-3xl font-bold mb-5">Create Account</Text>
-
-      {/* Image Picker */}
-      <TouchableOpacity
-        onPress={pickImage}
-        className="items-center justify-center mb-5"
-      >
-        {user.profile_picture ? (
-          <Image
-            source={{ uri: user.profile_picture.uri }}
-            className="w-24 h-24 rounded-full"
+    <View className="flex-1 justify-center px-6 bg-white">
+      <View className="flex-row pl-20 pb-3 ">
+        <Image
+          source={require("../assets/images/octal.png")}
+          style={{ width: 40, height: 40 }}
+        />
+        <Text className="text-gray-700 text-4xl font-bold ">Octal Chat</Text>
+      </View>
+      <Text className="text-3xl font-bold text-center text-gray-700">
+        Create Account
+      </Text>
+      <Text className="text-xl  text-gray-500 text-center mb-5">
+        Get your Octal Chat account now.
+      </Text>
+      <View className="  border border-gray-300 rounded-xl px-3 py-3 mb-3 bg-white">
+        <Text className="ml-2 text-xl font-semibold text-gray-500">Email</Text>
+        <View className="flex-row items-center border border-gray-300 rounded-xl p-1 mb-3 bg-white">
+          <MaterialCommunityIcons name="email-outline" size={24} color="gray" />
+          <TextInput
+            placeholder=" Enter Email"
+            className=" ml-3 text-base text-gray-800"
+            value={user.email}
+            onChangeText={(text) => setUser({ ...user, email: text })}
           />
-        ) : (
-          <View className="w-24 h-24 rounded-full bg-gray-200 items-center justify-center">
-            <Text className="text-gray-600">Pick Image</Text>
+        </View>
+
+        <View className="flex-row  justify-between">
+          <View>
+            <Text className="ml-2 text-xl font-semibold text-gray-500">
+              {" "}
+              Username
+            </Text>
+
+            <TextInput
+              placeholder="Enter Username"
+              className="border p-3 rounded mb-3"
+              value={user.username}
+              onChangeText={(text) => setUser({ ...user, username: text })}
+            />
           </View>
-        )}
-      </TouchableOpacity>
+          <View>
+            <Text className="ml-2 text-xl font-semibold text-gray-500">
+              {" "}
+              Contact Number
+            </Text>
+            <TextInput
+              placeholder=" Enter Contact Number"
+              className="border p-3 rounded mb-3"
+              value={user.contact_no}
+              keyboardType="phone-pad"
+              onChangeText={(text) => setUser({ ...user, contact_no: text })}
+            />
+          </View>
+        </View>
 
-      {/* Input Fields */}
-      <TextInput
-        placeholder="Email"
-        className="border p-3 rounded mb-3"
-        value={user.email}
-        onChangeText={(text) => setUser({ ...user, email: text })}
-      />
+        <View className="bg-gray-50">
+          <Text className="ml-2 text-xl font-semibold text-gray-500">
+            Location
+          </Text>
+          <View className="flex-row items-center border border-gray-300 rounded-xl px-3  mb-3 bg-white">
+            <SimpleLineIcons name="location-pin" size={24} color="black" />
+            <TextInput
+              placeholder="Enter Your Location"
+              className=" p-3 rounded py-4"
+              value={user.location}
+              onChangeText={(text) => setUser({ ...user, location: text })}
+            />
+          </View>
+        </View>
 
-      <TextInput
-        placeholder="Contact Number"
-        className="border p-3 rounded mb-3"
-        value={user.contact_no}
-        keyboardType="phone-pad"
-        onChangeText={(text) => setUser({ ...user, contact_no: text })}
-      />
+        <View className="flex-row justify-between  bg-gray-50">
+          <View>
+            <Text className="ml-2 text-xl font-semibold text-gray-500">
+              {" "}
+              Password
+            </Text>
+            <TextInput
+              placeholder="  Enter Password"
+              className="border p-3 rounded mb-3"
+              value={user.confirm_password}
+              secureTextEntry
+              onChangeText={(text) =>
+                setUser({ ...user, confirm_password: text })
+              }
+            />
+          </View>
+          <View>
+            <Text className="ml-2 text-xl font-semibold text-gray-500">
+              Confirm Password
+            </Text>
+            <TextInput
+              placeholder=" Confirm Password"
+              className="border p-3 rounded mb-3"
+              value={user.password}
+              secureTextEntry
+              onChangeText={(text) => setUser({ ...user, password: text })}
+            />
+          </View>
+        </View>
 
-      <TextInput
-        placeholder="Username"
-        className="border p-3 rounded mb-3"
-        value={user.username}
-        onChangeText={(text) => setUser({ ...user, username: text })}
-      />
+        <TouchableOpacity
+          disabled={loading}
+          onPress={handleSignup}
+          className="bg-indigo-400 py-3  rounded-2xl font-bold mt-2"
+        >
+          <Text className="text-white text-center text-lg">
+            {loading ? "Creating..." : "Sign Up"}
+          </Text>
+        </TouchableOpacity>
 
-      <TextInput
-        placeholder="Password"
-        className="border p-3 rounded mb-3"
-        value={user.password}
-        secureTextEntry
-        onChangeText={(text) => setUser({ ...user, password: text })}
-      />
-
-      <TextInput
-        placeholder="Confirm Password"
-        className="border p-3 rounded mb-3"
-        value={user.confirm_password}
-        secureTextEntry
-        onChangeText={(text) => setUser({ ...user, confirm_password: text })}
-      />
-
-      <TextInput
-        placeholder="Location"
-        className="border p-3 rounded mb-3"
-        value={user.location}
-        onChangeText={(text) => setUser({ ...user, location: text })}
-      />
-
-      {/* Signup Button */}
-      <TouchableOpacity
-        disabled={loading}
-        onPress={handleSignup}
-        className="bg-green-600 p-3 rounded mt-2"
-      >
-        <Text className="text-white text-center text-lg">
-          {loading ? "Creating..." : "Sign Up"}
-        </Text>
-      </TouchableOpacity>
-
-      {/* Go to Login */}
-      <TouchableOpacity onPress={() => router.push("/login")}>
-        <Text className="text-center text-blue-500 mt-4">
-          Already have an account? Login
-        </Text>
-      </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push("/login")}>
+          <Text className="text-center text-blue-500 mt-4">
+            Already have an account? Login
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
