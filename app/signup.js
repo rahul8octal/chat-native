@@ -12,12 +12,19 @@ import * as ImagePicker from "expo-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
+import Feather from '@expo/vector-icons/Feather';
 import api from "../utils/api";
+import Checkbox from "expo-checkbox";
+
 
 export default function Signup() {
   const router = useRouter();
-
+  const [showPass, setShowPass] = useState(false);
+  const [showPassSecond, setShowPassSecond] = useState(false);
+  const [remember, setRemember] = useState(false);
+ 
   const [user, setUser] = useState({
     email: "",
     contact_no: "",
@@ -69,7 +76,6 @@ export default function Signup() {
     formData.append("password", user.password);
     formData.append("confirm_password", user.confirm_password);
     formData.append("location", user.location);
-
     if (user.profile_picture) {
       formData.append("profile_picture", user.profile_picture);
     }
@@ -100,7 +106,7 @@ export default function Signup() {
   };
 
   return (
-    <View className="flex-1 justify-center px-6 bg-white">
+    <View className="flex-1 justify-center px-6  bg-white">
       <View className="flex-row pl-20 pb-3 ">
         <Image
           source={require("../assets/images/octal.png")}
@@ -114,9 +120,10 @@ export default function Signup() {
       <Text className="text-xl  text-gray-500 text-center mb-5">
         Get your Octal Chat account now.
       </Text>
-      <View className="  border border-gray-300 rounded-xl px-3 py-3 mb-3 bg-white">
+      
+      <View className="  border border-gray-300 rounded-xl px-3 py-2 mb-3 bg-gray-50">
         <Text className="ml-2 text-xl font-semibold text-gray-500">Email</Text>
-        <View className="flex-row items-center border border-gray-300 rounded-xl p-1 mb-3 bg-white">
+        <View className="flex-row items-center border border-gray-300 rounded-xl px-3 mb-3">
           <MaterialCommunityIcons name="email-outline" size={24} color="gray" />
           <TextInput
             placeholder=" Enter Email"
@@ -126,79 +133,116 @@ export default function Signup() {
           />
         </View>
 
-        <View className="flex-row  justify-between">
-          <View>
+        <View className="bg-gray-50">
+          
             <Text className="ml-2 text-xl font-semibold text-gray-500">
               {" "}
               Username
             </Text>
-
+       
+        <View className="flex-row items-center border border-gray-300 rounded-xl px-3  mb-3 ">
+            <Feather name="user" size={20} color="gray" />
             <TextInput
               placeholder="Enter Username"
-              className="border p-3 rounded mb-3"
+              className=""
               value={user.username}
               onChangeText={(text) => setUser({ ...user, username: text })}
             />
           </View>
-          <View>
+        </View>
+          <View className="bg-gray-50">
             <Text className="ml-2 text-xl font-semibold text-gray-500">
               {" "}
               Contact Number
             </Text>
+            <View className="flex-row border border-gray-300 items-center rounded-xl mb-3 px-3 ">
+            <MaterialIcons name="perm-contact-calendar" size={22} color="gray" />
             <TextInput
-              placeholder=" Enter Contact Number"
-              className="border p-3 rounded mb-3"
+              placeholder="Enter Contact Number"
               value={user.contact_no}
               keyboardType="phone-pad"
               onChangeText={(text) => setUser({ ...user, contact_no: text })}
             />
+            </View>
           </View>
-        </View>
-
+        
         <View className="bg-gray-50">
-          <Text className="ml-2 text-xl font-semibold text-gray-500">
-            Location
-          </Text>
-          <View className="flex-row items-center border border-gray-300 rounded-xl px-3  mb-3 bg-white">
-            <SimpleLineIcons name="location-pin" size={24} color="black" />
-            <TextInput
-              placeholder="Enter Your Location"
-              className=" p-3 rounded py-4"
-              value={user.location}
-              onChangeText={(text) => setUser({ ...user, location: text })}
-            />
-          </View>
-        </View>
-
-        <View className="flex-row justify-between  bg-gray-50">
           <View>
             <Text className="ml-2 text-xl font-semibold text-gray-500">
               {" "}
               Password
             </Text>
+            <View className="flex-row border border-gray-300 items-center rounded-xl mb-3 px-3 ">
+            <AntDesign name="lock" size={20} color="gray" />
             <TextInput
-              placeholder="  Enter Password"
-              className="border p-3 rounded mb-3"
+              placeholder="Enter Password"
+              className="pl-2"
               value={user.confirm_password}
               secureTextEntry
               onChangeText={(text) =>
                 setUser({ ...user, confirm_password: text })
               }
             />
+            <TouchableOpacity  className="pl-40" onPress={() => setShowPass(!showPass)}>
+            {showPass ? (
+              <AntDesign name="eye" size={20} color="gray" />
+            ) : (
+              <AntDesign name="eye-invisible" size={20} color="mediumslateblue" />
+            )}
+          </TouchableOpacity>
+            </View>
           </View>
-          <View>
+          </View>
+    
+          <View className="bg-gray-50">
             <Text className="ml-2 text-xl font-semibold text-gray-500">
+            {" "}
               Confirm Password
             </Text>
+            <View className="flex-row border border-gray-300  items-center rounded-xl mb-3 px-3">
+            <AntDesign name="lock" size={20} color="gray" className="" />
             <TextInput
-              placeholder=" Confirm Password"
-              className="border p-3 rounded mb-3"
+              placeholder="Confirm Password"
               value={user.password}
               secureTextEntry
               onChangeText={(text) => setUser({ ...user, password: text })}
             />
+             <TouchableOpacity className="pl-36"   onPress={() => setShowPassSecond(!showPassSecond)}>
+            {showPassSecond ? (
+              <AntDesign name="eye" size={20} color="gray" />
+            ) : (
+              <AntDesign name="eye-invisible" size={20} color="mediumslateblue" />
+            )}
+          </TouchableOpacity>
+            </View>
+          </View>
+        
+
+        <View className="bg-gray-50">
+          <Text className="ml-2 text-xl font-semibold text-gray-500">
+            Location
+          </Text>
+          <View className="flex-row items-center border border-gray-300 rounded-xl px-3  mb-3 ">
+            <SimpleLineIcons name="location-pin" size={24} color="gray" />
+            <TextInput
+              placeholder="Enter Your Location"
+              className="  p-3  py-4"
+              value={user.location}
+              onChangeText={(text) => setUser({ ...user, location: text })}
+            />
           </View>
         </View>
+
+       
+         <View>
+                  <View className="flex-row ">
+                    <Checkbox
+                      value={remember}
+                      onValueChange={setRemember}
+                      color={remember ? "#4F46E5" : undefined}
+                    />
+                    <Text className="ml-2 text-gray-500">Remember me</Text>
+                  </View>
 
         <TouchableOpacity
           disabled={loading}
@@ -211,11 +255,14 @@ export default function Signup() {
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => router.push("/login")}>
-          <Text className="text-center text-blue-500 mt-4">
-            Already have an account? Login
+          <Text className="text-center text-gray-600 mt-4">
+            Already have an account?
+            <Text className="text-indigo-600 ml-1">Sign in</Text>
           </Text>
         </TouchableOpacity>
       </View>
     </View>
+    </View>
+  
   );
 }
