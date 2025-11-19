@@ -7,6 +7,7 @@ export default {
     scheme: "chatapp",
     extra: {
       apiUrl: process.env.API_URL,
+      socketUrl: process.env.Socket_URL,
     },
   },
 };

@@ -8,7 +8,7 @@ export default function TabsLayout() {
         name="home"
         options={{
           title: "Home",
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
             <Ionicons name="chatbubbles-outline" size={size} color={color} />
           )
         }}
@@ -17,7 +17,7 @@ export default function TabsLayout() {
         name="status"
         options={{
           title: "Status",
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
             <Ionicons name="sync-outline" size={size} color={color} />
           )
         }}
@@ -26,7 +26,7 @@ export default function TabsLayout() {
         name="calls"
         options={{
           title: "Calls",
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
             <Ionicons name="call-outline" size={size} color={color} />
           )
         }}

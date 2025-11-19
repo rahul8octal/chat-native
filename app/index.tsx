@@ -3,8 +3,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Redirect } from "expo-router";
 
 export default function Index() {
-  const [tokenLoaded, setTokenLoaded] = useState(false);
-  const [token, setToken] = useState(null);
+  const [tokenLoaded, setTokenLoaded] = useState<boolean>(false);
+  const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
     const check = async () => {
