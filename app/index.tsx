@@ -1,21 +1,30 @@
-import { useEffect, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Redirect } from "expo-router";
+// app/index.tsx
+import React, { useEffect } from "react";
+import { ActivityIndicator, View } from "react-native";
+import { useRouter } from "expo-router";
+import useVerifyAuth from "@/hook/useVerifyAuth";
 
 export default function Index() {
-  const [tokenLoaded, setTokenLoaded] = useState<boolean>(false);
-  const [token, setToken] = useState<string | null>(null);
+  const router = useRouter();
+  const { checked, validSession } = useVerifyAuth();
 
   useEffect(() => {
-    const check = async () => {
-      const savedToken = await AsyncStorage.getItem("token");
-      setToken(savedToken);
-      setTokenLoaded(true);
-    };
-    check();
-  }, []);
+    if (!checked) return;
+  
+    if (validSession) {
+      router.replace("/home");
+    } else {
+      router.replace("/login");
+    }
+  }, [checked, validSession, router]);
 
-  if (!tokenLoaded) return null;
+  if (!checked) {
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
-  return token ? <Redirect href="/home" /> : <Redirect href="/login" />;
+  return null;
 }

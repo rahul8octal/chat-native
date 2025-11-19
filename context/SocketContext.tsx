@@ -10,12 +10,9 @@ import type {
   IReceiveTyping,
   IStatuses,
 } from "@/Types/socket";
-// import NewMessageToast from "@/components/CustomUi/NewMessageToast";
-// import useAuthStore from "@/store/useAuthStore";
-// import useControllerStore from "@/store/useControllerStore";
-// import { unstable_batchedUpdates } from "react-dom";
-// import { useIsMobile } from "@/hook/useMobile";
-// import useMobileMenuStore from "@/store/useMobileMenuStore";
+import useAuthStore from "@/store/useAuthStore";
+import useControllerStore from "@/store/useControllerStore";
+import useMobileMenuStore from "@/store/useMobileMenuStore";
 
 interface SocketContextType {
   socket: Socket<ServerToClientEvents, ClientToServerEvents>;
@@ -48,16 +45,14 @@ interface SocketContextType {
 const SocketContext = createContext<SocketContextType | null>(null);
 
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // const isMobile = useIsMobile();
-  // const setSelectedChat = useControllerStore((state) => state.setSelectedChat);
-  // const setChatMenuIsOpen = useMobileMenuStore((state) => state.setChatMenuIsOpen);
+  const setSelectedChat = useControllerStore((state) => state.setSelectedChat);
   const [AllConversations, setAllConversations] = useState<IChatConversation[]>([]);
   const [AllGroup, setAllGroup] = useState<IChatConversation[]>([]);
   const [conversation, setConversation] = useState<IConversation | null>(null);
   const [profile, setProfile] = useState<IProfile | null>(null);
   const [contacts, setContacts] = useState<IContact[]>([]);
   const [chats, setChats] = useState<IMessage[]>([]);
-  // const { user } = useAuthStore();
+  const { user } = useAuthStore();
   const [statuses, setStatuses] = useState<IStatuses[]>([]);
   const [selectedProfileDetail, setSelectedProfileDetail] = useState<IProfile | null>(null);
   const [selectedProfileId, setSelectedProfileId] = useState<{
@@ -149,18 +144,18 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         ) &&
         !(user?.id === data.sender_id)
       ) {
-        NewMessageToast({
-          message: data.message,
-          senderName: data.tab_type === "group" ? data.group_name : data.username || "Unknown User",
-          image: data.tab_type === "group" ? data.group_image : data.profile_image,
-          message_type: data.type,
-          conversation_type: data.tab_type,
-          sender: data.sender,
-          moduleId: data.tab_type === "group" ? data.receiver_id : data.sender_id,
-          isMobile,
-          setSelectedChat,
-          setChatMenuIsOpen,
-        });
+        // NewMessageToast({
+        //   message: data.message,
+        //   senderName: data.tab_type === "group" ? data.group_name : data.username || "Unknown User",
+        //   image: data.tab_type === "group" ? data.group_image : data.profile_image,
+        //   message_type: data.type,
+        //   conversation_type: data.tab_type,
+        //   sender: data.sender,
+        //   moduleId: data.tab_type === "group" ? data.receiver_id : data.sender_id,
+        //   isMobile,
+        //   setSelectedChat,
+        //   setChatMenuIsOpen,
+        // });
 
         setTimeout(() => {
           socket.emit("delivered", {
@@ -171,7 +166,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }, 500);
       }
     },
-    [profile, setSelectedChat, user?.id, isMobile, setChatMenuIsOpen]
+    [profile, user?.id]
   );
 
   useEffect(() => {
@@ -216,17 +211,17 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     });
 
     socket.on("new-conversation", (data) => {
-      NewMessageToast({
-        message: data.message,
-        senderName: data.username || "Unknown User",
-        image: data.profile_image,
-        message_type: data.message_type,
-        conversation_type: data.type,
-        moduleId: data.receiver_id,
-        isMobile,
-        setSelectedChat: setSelectedChat,
-        setChatMenuIsOpen: setChatMenuIsOpen,
-      });
+      // NewMessageToast({
+      //   message: data.message,
+      //   senderName: data.username || "Unknown User",
+      //   image: data.profile_image,
+      //   message_type: data.message_type,
+      //   conversation_type: data.type,
+      //   moduleId: data.receiver_id,
+      //   isMobile,
+      //   setSelectedChat: setSelectedChat,
+      //   setChatMenuIsOpen: setChatMenuIsOpen,
+      // });
     });
 
     socket.on("conversation-deleted", (data) => {
