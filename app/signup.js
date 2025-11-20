@@ -23,33 +23,13 @@ import Feather from "@expo/vector-icons/Feather";
 import Checkbox from "expo-checkbox";
 import api from "../utils/api";
 
-type ProfileImage = {
-  uri: string;
-  type: string;
-  name: string;
-};
-
-type SignupFormState = {
-  email: string;
-  contact_no: string;
-  username: string;
-  password: string;
-  confirm_password: string;
-  location: string;
-  profile_picture: ProfileImage | null;
-};
-
-type SignupResponse = {
-  token?: string;
-};
-
 export default function Signup() {
   const router = useRouter();
-  const [showPass, setShowPass] = useState<boolean>(false);
-  const [showPassSecond, setShowPassSecond] = useState<boolean>(false);
-  const [remember, setRemember] = useState<boolean>(false);
+  const [showPass, setShowPass] = useState(false);
+  const [showPassSecond, setShowPassSecond] = useState(false);
+  const [remember, setRemember] = useState(false);
 
-  const [user, setUser] = useState<SignupFormState>({
+  const [user, setUser] = useState({
     email: "",
     contact_no: "",
     username: "",
@@ -59,7 +39,7 @@ export default function Signup() {
     profile_picture: null,
   });
 
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -102,11 +82,11 @@ export default function Signup() {
     formData.append("confirm_password", user.confirm_password);
     formData.append("location", user.location);
     if (user.profile_picture) {
-      formData.append("profile_picture", user.profile_picture as unknown as Blob);
+      formData.append("profile_picture", user.profile_picture);
     }
 
     try {
-      const response = await api.post<SignupResponse>("/signup", formData, {
+      const response = await api.post("/signup", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -119,9 +99,11 @@ export default function Signup() {
       Alert.alert("Success", "Signup successfully!");
       router.replace("/home");
     } catch (error) {
-      const err = error as { response?: { data?: { message?: string } } };
-      console.log(err.response?.data || err);
-      Alert.alert("Signup Failed", err.response?.data?.message || "Try again!");
+      const apiError =
+        typeof error === "object" && error !== null ? error : { response: null };
+      const apiMessage = apiError?.response?.data?.message;
+      console.log(apiError?.response?.data || apiError);
+      Alert.alert("Signup Failed", apiMessage || "Try again!");
     } finally {
       setLoading(false);
     }

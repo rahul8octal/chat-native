@@ -17,22 +17,16 @@ import api from "../utils/api";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Checkbox from "expo-checkbox";
 import { connectSocketWithToken } from "../lib/socket";
-import { IUser } from "@/Types";
 import useAuthStore from "@/store/useAuthStore";
-
-type LoginResponse = {
-	token?: string;
-	data: IUser;
-};
 
 export default function Login() {
 	const router = useRouter();
 	const login = useAuthStore((s) => s.login);
-	const [email, setEmail] = useState<string>("");
-	const [password, setPassword] = useState<string>("");
-	const [remember, setRemember] = useState<boolean>(false);
-	const [showPass, setShowPass] = useState<boolean>(false);
-	const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
+	const [remember, setRemember] = useState(false);
+	const [showPass, setShowPass] = useState(false);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const handleLogin = async () => {
 		if (!email || !password) {
@@ -42,22 +36,22 @@ export default function Login() {
 		setIsSubmitting(true);
 
 		try {
-			const res = await api.post<LoginResponse>("/auth/login", {
+			const res = await api.post("/auth/login", {
 				email,
 				password,
 			});
 			if (!res) return;
-			login(res.data.data as IUser, (res.data?.token as string) || "");
+			login(res.data.data, res.data?.token || "");
 			connectSocketWithToken();
 			router.replace("/home");
-		} catch (err: unknown) {
+		} catch (err) {
 			console.error("Login error:", err);
-			let message: string = "Something went wrong. Please try again.";
+			let message = "Something went wrong. Please try again.";
 
 			if (err instanceof Error) message = err.message;
 			else if (typeof err === "string") message = err;
 			else if (typeof err === "object" && err !== null)
-				message = (err as any).message || JSON.stringify(err);
+				message = err.message || JSON.stringify(err);
 			Alert.alert(message);
 		} finally {
 			setIsSubmitting(false);

@@ -1,69 +1,23 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
-import socket, { type ServerToClientEvents, type ClientToServerEvents } from "@/lib/socket";
-import { Socket } from "socket.io-client";
-import type {
-  IChatConversation,
-  IContact,
-  IConversation,
-  IMessage,
-  IProfile,
-  IReceiveTyping,
-  IStatuses,
-} from "@/Types/socket";
+import { unstable_batchedUpdates } from "react-native";
+import socket from "@/lib/socket";
 import useAuthStore from "@/store/useAuthStore";
-import useControllerStore from "@/store/useControllerStore";
-import useMobileMenuStore from "@/store/useMobileMenuStore";
 
-interface SocketContextType {
-  socket: Socket<ServerToClientEvents, ClientToServerEvents>;
-  profile: IProfile | null;
-  setProfile: React.Dispatch<React.SetStateAction<IProfile | null>>;
-  conversation: IConversation | null;
-  setConversation: React.Dispatch<React.SetStateAction<IConversation | null>>;
-  chats: IMessage[];
-  setChats: React.Dispatch<React.SetStateAction<IMessage[]>>;
-  statuses: IStatuses[];
-  setStatuses: React.Dispatch<React.SetStateAction<IStatuses[]>>;
-  contacts: IContact[];
-  AllConversations: IChatConversation[];
-  setAllConversations: React.Dispatch<React.SetStateAction<IChatConversation[]>>;
-  AllGroup: IChatConversation[];
-  selectedProfileDetail: IProfile | null;
-  setSelectedProfileDetail: React.Dispatch<React.SetStateAction<IProfile | null>>;
-  selectedProfileId: {
-    id: string;
-    type: "user" | "group";
-  } | null;
-  setSelectedProfileId: React.Dispatch<
-    React.SetStateAction<{
-      id: string;
-      type: "user" | "group";
-    } | null>
-  >;
-}
+const SocketContext = createContext(null);
 
-const SocketContext = createContext<SocketContextType | null>(null);
-
-export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const setSelectedChat = useControllerStore((state) => state.setSelectedChat);
-  const [AllConversations, setAllConversations] = useState<IChatConversation[]>([]);
-  const [AllGroup, setAllGroup] = useState<IChatConversation[]>([]);
-  const [conversation, setConversation] = useState<IConversation | null>(null);
-  const [profile, setProfile] = useState<IProfile | null>(null);
-  const [contacts, setContacts] = useState<IContact[]>([]);
-  const [chats, setChats] = useState<IMessage[]>([]);
+export const SocketProvider = ({ children }) => {
+  const [AllConversations, setAllConversations] = useState([]);
+  const [AllGroup, setAllGroup] = useState([]);
+  const [conversation, setConversation] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [contacts, setContacts] = useState([]);
+  const [chats, setChats] = useState([]);
   const { user } = useAuthStore();
-  const [statuses, setStatuses] = useState<IStatuses[]>([]);
-  const [selectedProfileDetail, setSelectedProfileDetail] = useState<IProfile | null>(null);
-  const [selectedProfileId, setSelectedProfileId] = useState<{
-    id: string;
-    type: "user" | "group";
-  } | null>(null);
+  const [statuses, setStatuses] = useState([]);
+  const [selectedProfileDetail, setSelectedProfileDetail] = useState(null);
+  const [selectedProfileId, setSelectedProfileId] = useState(null);
 
-  const typingTimeouts = useRef<{
-    user: Record<string, NodeJS.Timeout>;
-    group: Record<string, Record<string, NodeJS.Timeout>>;
-  }>({
+  const typingTimeouts = useRef({
     user: {},
     group: {},
   });
@@ -73,7 +27,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, [AllConversations]);
 
   const updateAllConversations = useCallback(
-    (data: IMessage) => {
+    (data) => {
       setAllConversations((prev) =>
         prev.map((conversation) => {
           if (data.tab_type === "group") {
@@ -122,7 +76,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   );
 
   const maybeAppendChat = useCallback(
-    (data: IMessage) => {
+    (data) => {
       if (
         profile &&
         (profile.id === data.sender_id || profile.id === data.receiver_id) &&
@@ -135,7 +89,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   );
 
   const handleToastAndDelivery = useCallback(
-    (data: IMessage) => {
+    (data) => {
       if (
         !(
           profile &&
@@ -144,19 +98,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         ) &&
         !(user?.id === data.sender_id)
       ) {
-        // NewMessageToast({
-        //   message: data.message,
-        //   senderName: data.tab_type === "group" ? data.group_name : data.username || "Unknown User",
-        //   image: data.tab_type === "group" ? data.group_image : data.profile_image,
-        //   message_type: data.type,
-        //   conversation_type: data.tab_type,
-        //   sender: data.sender,
-        //   moduleId: data.tab_type === "group" ? data.receiver_id : data.sender_id,
-        //   isMobile,
-        //   setSelectedChat,
-        //   setChatMenuIsOpen,
-        // });
-
         setTimeout(() => {
           socket.emit("delivered", {
             chat_Id: data.id || "",
@@ -186,7 +127,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setChats([]);
         return;
       }
-      setConversation(data.conversation as IConversation);
+      setConversation(data.conversation);
       if (data.messages) setChats(data.messages);
       else setChats([]);
     });
@@ -208,20 +149,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             : conversation
         )
       );
-    });
-
-    socket.on("new-conversation", (data) => {
-      // NewMessageToast({
-      //   message: data.message,
-      //   senderName: data.username || "Unknown User",
-      //   image: data.profile_image,
-      //   message_type: data.message_type,
-      //   conversation_type: data.type,
-      //   moduleId: data.receiver_id,
-      //   isMobile,
-      //   setSelectedChat: setSelectedChat,
-      //   setChatMenuIsOpen: setChatMenuIsOpen,
-      // });
     });
 
     socket.on("conversation-deleted", (data) => {
@@ -289,12 +216,13 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           );
         } else if (data.type === "user" && profile?.type === "user") {
           setChats((prev) =>
-            prev.map((chat) =>
-              !["read", "delivered"].includes(chat.readStatus as string) &&
-              chat.sender_id === user?.id
-                ? { ...chat, readStatus: "delivered" }
-                : chat
-            )
+            prev.map((chat) => {
+              const status = typeof chat.readStatus === "string" ? chat.readStatus : "";
+              if (!["read", "delivered"].includes(status) && chat.sender_id === user?.id) {
+                return { ...chat, readStatus: "delivered" };
+              }
+              return chat;
+            })
           );
         }
       }
@@ -317,7 +245,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             if (s.id !== data.status_id) return s;
 
             const alreadyViewed =
-              Array.isArray(s.viewers) && s.viewers.some((v: any) => v.id === data.viewer.id);
+              Array.isArray(s.viewers) && s.viewers.some((v) => v.id === data.viewer.id);
 
             const newViewers = alreadyViewed ? s.viewers : [...(s.viewers ?? []), data.viewer];
             const newViewsCount = (s.views ?? s.viewers?.length ?? 0) + 1;
@@ -347,7 +275,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       socket.off("user-conversation");
       socket.off("delete-messaged");
       socket.off("update-conversation-count");
-      socket.off("new-conversation");
       socket.off("new-message");
       socket.off("poll-updated");
       socket.off("seen");
@@ -363,14 +290,13 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     user?.id,
     conversation?.id,
     selectedProfileId?.id,
-    setSelectedChat,
     updateAllConversations,
     maybeAppendChat,
     handleToastAndDelivery,
   ]);
 
   const handleTyping = useCallback(
-    (data: IReceiveTyping) => {
+    (data) => {
       const userId = data.user.id;
       const receiverId = data.receiver_id;
       const typing = data.typing ?? true;

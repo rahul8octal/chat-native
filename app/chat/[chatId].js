@@ -21,36 +21,29 @@ import {
   getChatTitle,
 } from "../../utils/chatHelpers";
 
-type ChatConversation = Record<string, any>;
-type MessageEntry = Record<string, any>;
-
 export default function ChatDetail() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ chatId?: string | string[] }>();
+  const params = useLocalSearchParams();
 
-  const socketContext = useSocket() as any;
+  const socketContext = useSocket();
   const socket = socketContext.socket;
-  const conversations: ChatConversation[] = socketContext.conversations ?? [];
-  const messages: MessageEntry[] = socketContext.messages ?? [];
-  const selectedChat: ChatConversation | null = socketContext.selectedChat ?? null;
-  const selectChat: (chat: ChatConversation) => void = socketContext.selectChat ?? (() => {});
-  const leaveChat: () => void = socketContext.leaveChat ?? (() => {});
-  const sendMessage: (chatId: string, value: string) => void =
-    socketContext.sendMessage ?? (() => {});
-  const emitTyping: (chatId: string, typing: boolean) => void =
-    socketContext.emitTyping ?? (() => {});
-  const typingUsers: Record<string, string> = socketContext.typingUsers ?? {};
-  const loadingMessages: boolean = socketContext.loadingMessages ?? false;
+  const conversations = socketContext.conversations ?? [];
+  const messages = socketContext.messages ?? [];
+  const selectedChat = socketContext.selectedChat ?? null;
+  const selectChat = socketContext.selectChat ?? (() => {});
+  const leaveChat = socketContext.leaveChat ?? (() => {});
+  const sendMessage = socketContext.sendMessage ?? (() => {});
+  const emitTyping = socketContext.emitTyping ?? (() => {});
+  const typingUsers = socketContext.typingUsers ?? {};
+  const loadingMessages = socketContext.loadingMessages ?? false;
   const profile = socketContext.profile ?? null;
-  const setProfile: (value: any) => void = socketContext.setProfile ?? (() => {});
-  const setMessages: React.Dispatch<React.SetStateAction<MessageEntry[]>> =
-    socketContext.setMessages ?? (() => {});
-  const setSelectedChat: (value: ChatConversation | null) => void =
-    socketContext.setSelectedChat ?? (() => {});
+  const setProfile = socketContext.setProfile ?? (() => {});
+  const setMessages = socketContext.setMessages ?? (() => {});
+  const setSelectedChat = socketContext.setSelectedChat ?? (() => {});
 
   const [text, setText] = useState("");
-  const listRef = useRef<FlatList<any> | null>(null);
-  const typingRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const listRef = useRef(null);
+  const typingRef = useRef(null);
 
   const chatIdParam = Array.isArray(params.chatId) ? params.chatId[0] : params.chatId;
   const chatId = chatIdParam || extractChatId(selectedChat) || "";
@@ -114,7 +107,7 @@ export default function ChatDetail() {
   const title = useMemo(() => getChatTitle(selectedChat || {}), [selectedChat]);
 
   const handleChangeText = useCallback(
-    (value: string) => {
+    (value) => {
       setText(value);
       if (!chatId) return;
 
@@ -142,7 +135,7 @@ export default function ChatDetail() {
     }
   };
 
-  const renderMessage = ({ item }: { item: MessageEntry }) => {
+  const renderMessage = ({ item }) => {
     const senderId = item?.senderId || item?.userId || item?.from;
     const isMine = senderId && meId ? senderId === meId : item?.isMine;
     const body = extractMessageText(item);

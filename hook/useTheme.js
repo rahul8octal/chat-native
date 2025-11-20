@@ -1,33 +1,20 @@
 import * as React from "react";
 
-type Theme = "light" | "dark" | "system";
-
-interface ThemeProviderProps {
-  children: React.ReactNode;
-  defaultTheme?: Theme;
-  storageKey?: string;
-}
-
-interface ThemeProviderState {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
-}
-
-const initialState: ThemeProviderState = {
+const initialState = {
   theme: "system",
   setTheme: () => null,
 };
 
-const ThemeProviderContext = React.createContext<ThemeProviderState>(initialState);
+const ThemeProviderContext = React.createContext(initialState);
 
 export function ThemeProvider({
   children,
-  defaultTheme = "light", 
+  defaultTheme = "light",
   storageKey = "chat-app-theme",
   ...props
-}: ThemeProviderProps) {
-  const [theme, setTheme] = React.useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
+}) {
+  const [theme, setTheme] = React.useState(
+    () => localStorage.getItem(storageKey) || defaultTheme
   );
 
   React.useEffect(() => {
@@ -49,9 +36,9 @@ export function ThemeProvider({
 
   const value = {
     theme,
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme);
-      setTheme(theme);
+    setTheme: (nextTheme) => {
+      localStorage.setItem(storageKey, nextTheme);
+      setTheme(nextTheme);
     },
   };
 

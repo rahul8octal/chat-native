@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import useAuthStore from "@/store/useAuthStore";
-import type { IUser } from "@/Types";
 import Constants from "expo-constants";
 
 const API_BASE = Constants?.expoConfig?.extra?.apiUrl ?? ""; 
@@ -52,7 +51,7 @@ export default function useVerifyAuth() {
         if (res.ok) {
           const data = await res.json();
           // API shape: { user: {...} } or user directly — handle both
-          const u: IUser | null = (data?.user ?? data) as IUser | null;
+          const u = data?.user ?? data;
 
           if (u) {
             // set store: use login so store.token also gets set

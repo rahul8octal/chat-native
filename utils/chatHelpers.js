@@ -1,14 +1,12 @@
-type AnyRecord = Record<string, any>;
-
-export const extractChatId = (chat?: AnyRecord | null) => {
+export const extractChatId = (chat) => {
   if (!chat) return null;
   return chat.chatId || chat._id || chat.id || null;
 };
 
-export const getChatTitle = (chat: AnyRecord = {}) => {
+export const getChatTitle = (chat = {}) => {
   const participants = Array.isArray(chat.participants)
     ? chat.participants
-        .map((user: AnyRecord) => user?.username || user?.name)
+        .map((user) => user?.username || user?.name)
         .filter(Boolean)
         .join(", ")
     : null;
@@ -23,7 +21,7 @@ export const getChatTitle = (chat: AnyRecord = {}) => {
   );
 };
 
-export const getChatAvatar = (chat: AnyRecord = {}) =>
+export const getChatAvatar = (chat = {}) =>
   chat.photo ||
   chat.avatar ||
   chat.image ||
@@ -32,7 +30,7 @@ export const getChatAvatar = (chat: AnyRecord = {}) =>
   chat.participants?.[0]?.photo ||
   null;
 
-export const getLastMessagePreview = (chat: AnyRecord = {}) => {
+export const getLastMessagePreview = (chat = {}) => {
   const preview =
     chat.lastMessage?.message ||
     chat.lastMessage?.text ||
@@ -43,7 +41,7 @@ export const getLastMessagePreview = (chat: AnyRecord = {}) => {
   return typeof preview === "string" ? preview : String(preview);
 };
 
-export const extractMessageText = (message: AnyRecord = {}) => {
+export const extractMessageText = (message = {}) => {
   if (!message) return "";
   return (
     message.message ||
@@ -53,10 +51,10 @@ export const extractMessageText = (message: AnyRecord = {}) => {
   );
 };
 
-export const extractMessageTimestamp = (message: AnyRecord = {}) =>
+export const extractMessageTimestamp = (message = {}) =>
   message?.createdAt || message?.updatedAt || message?.timestamp || null;
 
-export const formatMessageTime = (value?: string | number | Date | null) => {
+export const formatMessageTime = (value) => {
   if (!value && value !== 0) return "";
 
   const date =
@@ -66,5 +64,5 @@ export const formatMessageTime = (value?: string | number | Date | null) => {
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 };
 
-export const getInitials = (value: string) =>
+export const getInitials = (value = "") =>
   value ? value.slice(0, 2).toUpperCase() : "??";

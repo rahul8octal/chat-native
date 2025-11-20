@@ -1,17 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import {
-	FlatList,
-	Image,
-	ListRenderItem,
-	Text,
-	TextInput,
-	TouchableOpacity,
-	View,
-} from "react-native";
+import { FlatList, Image, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { disconnectSocket } from "../../lib/socket";
 import { useSocket } from "../../context/SocketContext";
 import {
@@ -19,18 +9,15 @@ import {
 	formatMessageTime,
 	getInitials,
 } from "../../utils/chatHelpers";
-import { IChatConversation } from "@/Types/socket";
 import useAuthStore from "@/store/useAuthStore";
 
-type FilterOption = "All" | "Unread" | "Favorite" | "Group";
-
-const getConversationName = (chat: IChatConversation) =>
+const getConversationName = (chat) =>
 	chat.group_name || chat.username || "Conversation";
 
-const getConversationAvatar = (chat: IChatConversation) =>
+const getConversationAvatar = (chat) =>
 	chat.group_image || chat.profile_image || null;
 
-function ChatAvatar({ chat }: { chat: IChatConversation }) {
+function ChatAvatar({ chat }) {
 	const avatarUri = getConversationAvatar(chat);
 	const initials = getInitials(getConversationName(chat));
 
@@ -52,9 +39,9 @@ function ChatAvatar({ chat }: { chat: IChatConversation }) {
 
 export default function Home() {
 	const { user, gotoLogin } = useAuthStore();
-	const [search, setSearch] = useState<string>("");
-	const [activeFilter, setActiveFilter] = useState<FilterOption>("All");
-	const filters: FilterOption[] = ["All", "Unread", "Favorite", "Group"];
+	const [search, setSearch] = useState("");
+	const [activeFilter, setActiveFilter] = useState("All");
+	const filters = ["All", "Unread", "Favorite", "Group"];
 
 	const { socket, AllConversations, setAllConversations } = useSocket();
 
@@ -75,7 +62,7 @@ export default function Home() {
 	};
 
 	const getMessagePreview = useCallback(
-		(chat: IChatConversation) => {
+		(chat) => {
 			const currentUserId = user?.id;
 			const messageType = chat.message_type || "text";
 			const conversationType = chat.type || "user";
@@ -109,7 +96,7 @@ export default function Home() {
 
 			if (!messageText) return "";
 
-			const truncate = (text: string) =>
+			const truncate = (text) =>
 				text.length > 40 ? `${text.slice(0, 40)}…` : text;
 
 			switch (messageType) {
@@ -187,14 +174,14 @@ export default function Home() {
 	}, [AllConversations, search, activeFilter]);
 	console.log("filteredChats", filteredChats);
 
-	const handleOpenChat = (chat: IChatConversation) => {
+	const handleOpenChat = (chat) => {
 		const chatId = extractChatId(chat) || chat?.receiver_id || chat?.id;
 		if (!chatId) return;
 		// selectChat({ ...chat, chatId });
 		// router.push({ pathname: "/chat/[chatId]", params: { chatId } });
 	};
 
-	const renderChat: ListRenderItem<IChatConversation> = ({ item }) => (
+	const renderChat = ({ item }) => (
 		<TouchableOpacity
 			onPress={() => handleOpenChat(item)}
 			className="flex-row justify-between items-center py-3 border-b border-gray-200"
@@ -266,7 +253,7 @@ export default function Home() {
 		}
 
 		return (
-			<FlatList<IChatConversation>
+			<FlatList
 				data={filteredChats}
 				renderItem={renderChat}
 				keyExtractor={(item, index) =>

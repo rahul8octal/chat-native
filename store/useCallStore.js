@@ -1,65 +1,25 @@
 import { create } from "zustand";
 import socket from "@/lib/socket";
-import type { IUser } from "@/Types";
-import type { IProfile } from "@/Types/socket";
 
-type CallMeta = { type: "audio" | "video" };
-
-type IncomingCall = {
-  fromUserId: string;
-  callId: string;
-  metadata?: CallMeta;
-  caller: IUser;
-} | null;
-
-type CallState = {
-  // reactive state
-  incomingCall: IncomingCall;
-  isCalling: boolean;
-  inCall: boolean;
-  muted: boolean;
-  videoEnabled: boolean;
-  remoteVideoEnabled: boolean;
-  activeCall: { callId: string; peerId: string; metadata?: CallMeta, caller: IUser } | null;
-
-  // mutable refs (not reactive, but we keep them here)
-  pc: RTCPeerConnection | null;
-  localStream: MediaStream | null;
-  remoteStream: MediaStream | null;
-  localVideoEl: HTMLVideoElement | null;
-  remoteVideoEl: HTMLVideoElement | null;
-
-  // actions
-  init: () => void;
-  dispose: () => void;
-  startCall: (user: IProfile, type?: "audio" | "video") => Promise<void>;
-  acceptCall: () => Promise<void>;
-  rejectCall: (reason?: string) => void;
-  hangup: () => void;
-  toggleMute: () => void;
-  toggleVideo: () => void;
-  setLocalVideoEl: (el: HTMLVideoElement | null) => void;
-  setRemoteVideoEl: (el: HTMLVideoElement | null) => void;
-};
-
-const ICE_CONFIG: RTCConfiguration = {
+const ICE_CONFIG = {
   iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
 };
 
-const useCallStore = create<CallState>((set, get) => {
+const useCallStore = create((set, get) => {
   // helpers (non-exported)
-  const ensureLocalMedia = async (wantVideo: boolean) => {
-    if (get().localStream) {
-      const hasVideo = get().localStream!.getVideoTracks().length > 0;
+  const ensureLocalMedia = async (wantVideo) => {
+    const existingStream = get().localStream;
+    if (existingStream) {
+      const hasVideo = existingStream.getVideoTracks().length > 0;
       if (
         (wantVideo && hasVideo) ||
-        (!wantVideo && get().localStream!.getAudioTracks().length > 0)
+        (!wantVideo && existingStream.getAudioTracks().length > 0)
       ) {
-        return get().localStream!;
+        return existingStream;
       }
     }
 
-    const constraints: MediaStreamConstraints = {
+    const constraints = {
       audio: true,
       video: wantVideo ? { width: { ideal: 640 }, height: { ideal: 480 } } : false,
     };
@@ -77,11 +37,10 @@ const useCallStore = create<CallState>((set, get) => {
     }
 
     // stop old stream if switching
-    if (get().localStream) {
+    const previousStream = get().localStream;
+    if (previousStream) {
       try {
-        get()
-          .localStream!.getTracks()
-          .forEach((t) => t.stop());
+        previousStream.getTracks().forEach((t) => t.stop());
       } catch {}
     }
     // set localStream ref (mutable)
@@ -90,15 +49,16 @@ const useCallStore = create<CallState>((set, get) => {
   };
 
   const createPeer = async (
-    isInitiator: boolean,
-    peerId: string,
-    callId: string,
-    metadata?: CallMeta
-  ): Promise<RTCPeerConnection> => {
+    isInitiator,
+    peerId,
+    callId,
+    metadata
+  ) => {
     // console.log("store.createPeer", { isInitiator, peerId, callId, metadata });
-    if (get().pc) {
+    const existingPc = get().pc;
+    if (existingPc) {
       console.warn("store.createPeer: reusing existing pc");
-      return get().pc!;
+      return existingPc;
     }
     const pc = new RTCPeerConnection(ICE_CONFIG);
     // set pc ref
@@ -162,13 +122,14 @@ const useCallStore = create<CallState>((set, get) => {
     const wantVideo = metadata?.type === "video";
 
     // try to get media, with fallback if camera not found
-    let localStream: MediaStream | null = null;
+    let localStream = null;
     try {
       localStream = await ensureLocalMedia(wantVideo);
-    } catch (err: any) {
+    } catch (err) {
       const fallbackErrors = ["NotFoundError", "OverconstrainedError", "NotReadableError"];
-      if (wantVideo && err && fallbackErrors.includes(err.name)) {
-        console.warn("createPeer: camera missing — falling back to audio-only", err.name);
+      const errName = err && typeof err === "object" ? err.name : undefined;
+      if (wantVideo && errName && fallbackErrors.includes(errName)) {
+        console.warn("createPeer: camera missing — falling back to audio-only", errName);
         // update metadata and activeCall
         const active = get().activeCall;
         if (active) active.metadata = { type: "audio" };
@@ -190,7 +151,7 @@ const useCallStore = create<CallState>((set, get) => {
     // add tracks
     localStream.getTracks().forEach((t) => {
       try {
-        pc.addTrack(t, localStream!);
+        pc.addTrack(t, localStream);
       } catch (e) {
         console.warn("pc.addTrack failed in store", e);
       }
@@ -221,16 +182,17 @@ const useCallStore = create<CallState>((set, get) => {
       videoEnabled: false,
       muted: false,
     });
-    if (get().localStream) {
+    const currentStream = get().localStream;
+    if (currentStream) {
       try {
-        get()
-          .localStream!.getTracks()
-          .forEach((t) => t.stop());
+        currentStream.getTracks().forEach((t) => t.stop());
       } catch {}
       set({ localStream: null });
     }
-    if (get()?.localVideoEl) (get().localVideoEl as any).srcObject = null;
-    if (get()?.remoteVideoEl) (get().remoteVideoEl as any).srcObject = null;
+    const localVideoEl = get().localVideoEl;
+    if (localVideoEl) localVideoEl.srcObject = null;
+    const remoteVideoEl = get().remoteVideoEl;
+    if (remoteVideoEl) remoteVideoEl.srcObject = null;
   };
 
   // attach socket listeners once
@@ -262,7 +224,7 @@ const useCallStore = create<CallState>((set, get) => {
       set({ incomingCall: payload });
     });
 
-    socket.on("call:accepted", async (payload: { fromUserId: string; callId: string }) => {
+    socket.on("call:accepted", async (payload) => {
       // console.log("socket call:accepted", payload);
       const active = get().activeCall;
       try {
@@ -282,12 +244,12 @@ const useCallStore = create<CallState>((set, get) => {
 
     socket.on("call:signal", async (payload) => {
       // console.log("socket call:signal", payload);
-      const { fromUserId, callId, data, caller, } = payload;
+      const { fromUserId, callId, data, caller } = payload;
       if (!get().pc && data?.type === "offer") {
         // create peer as callee; prefer incomingCall or activeCall metadata
         const meta = get().incomingCall?.metadata ??
-          get().activeCall?.metadata ?? { type: "audio" as const };
-        set({ activeCall: { callId, peerId: fromUserId, metadata: meta, caller: caller }});
+          get().activeCall?.metadata ?? { type: "audio" };
+        set({ activeCall: { callId, peerId: fromUserId, metadata: meta, caller }});
         try {
           await createPeer(false, fromUserId, callId, meta);
         } catch (err) {
@@ -342,7 +304,7 @@ const useCallStore = create<CallState>((set, get) => {
   };
 
   // public actions
-  const startCall = async (user: IProfile, type: "audio" | "video" = "audio") => {
+  const startCall = async (user, type = "audio") => {
     console.log("startCall", user, type);
     const callId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     set({ activeCall: { callId, peerId: user.id || "", metadata: { type }, caller: user }, isCalling: true });
@@ -394,7 +356,7 @@ const useCallStore = create<CallState>((set, get) => {
     }
   };
 
-  const rejectCall = (reason?: string) => {
+  const rejectCall = (reason) => {
     // console.log("store.rejectCall", get());
     const incoming = get().incomingCall;
     if (!incoming) return;
@@ -507,7 +469,7 @@ const useCallStore = create<CallState>((set, get) => {
 
     try {
       // 1. Get *only* the video media
-      const videoConstraints: MediaStreamConstraints = {
+      const videoConstraints = {
         video: { width: { ideal: 640 }, height: { ideal: 480 } },
       };
       const videoStream = await navigator.mediaDevices.getUserMedia(videoConstraints);
@@ -558,10 +520,11 @@ const useCallStore = create<CallState>((set, get) => {
       // 7. Request renegotiation
       await sendRenegotiationOffer();
       set({ videoEnabled: true });
-    } catch (err: any) {
+    } catch (err) {
       const fallbackErrors = ["NotFoundError", "OverconstrainedError", "NotReadableError"];
-      if (err && fallbackErrors.includes(err.name)) {
-        console.warn("upgradeToVideo: camera missing — keeping audio-only", err.name);
+      const errName = err && typeof err === "object" ? err.name : undefined;
+      if (errName && fallbackErrors.includes(errName)) {
+        console.warn("upgradeToVideo: camera missing — keeping audio-only", errName);
         set({ videoEnabled: false });
         return;
       }
@@ -607,11 +570,10 @@ const useCallStore = create<CallState>((set, get) => {
         senders.forEach((s) => {
           if (s.track && s.track.kind === "video") {
             try {
-              if ((pc as any).removeTrack) {
-                (pc as any).removeTrack(s);
-              } else {
-                // fallback: replace with null/stop
-                if (s.replaceTrack) s.replaceTrack(null as any).catch(() => {});
+              if (typeof pc.removeTrack === "function") {
+                pc.removeTrack(s);
+              } else if (s.replaceTrack) {
+                s.replaceTrack(null).catch(() => {});
               }
             } catch (e) {
               console.warn("removeTrack failed", e);
@@ -634,8 +596,8 @@ const useCallStore = create<CallState>((set, get) => {
     }
   };
 
-  const setLocalVideoEl = (el: HTMLVideoElement | null) => set({ localVideoEl: el });
-  const setRemoteVideoEl = (el: HTMLVideoElement | null) => set({ remoteVideoEl: el });
+  const setLocalVideoEl = (el) => set({ localVideoEl: el });
+  const setRemoteVideoEl = (el) => set({ remoteVideoEl: el });
 
   return {
     incomingCall: null,
