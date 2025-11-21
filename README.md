@@ -48,3 +48,11 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+
+
+node v22.21.1 (npm v10.9.4)
+
+source /home/octal/.nvm/nvm.sh && nvm use 22
+
+npx eas-cli build -p android --profile preview
