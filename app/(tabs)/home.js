@@ -1,3 +1,4 @@
+import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FlatList, Image, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -38,12 +39,13 @@ function ChatAvatar({ chat }) {
 }
 
 export default function Home() {
+	const router = useRouter();
 	const { user, gotoLogin } = useAuthStore();
 	const [search, setSearch] = useState("");
 	const [activeFilter, setActiveFilter] = useState("All");
 	const filters = ["All", "Unread", "Favorite", "Group"];
 
-	const { socket, AllConversations, setAllConversations } = useSocket();
+	const { socket, AllConversations, setAllConversations,setConversation } = useSocket();
 
 	useEffect(() => {
 		if (!socket) return;
@@ -172,13 +174,12 @@ export default function Home() {
 
 		return list;
 	}, [AllConversations, search, activeFilter]);
-	console.log("filteredChats", filteredChats);
 
 	const handleOpenChat = (chat) => {
 		const chatId = extractChatId(chat) || chat?.receiver_id || chat?.id;
 		if (!chatId) return;
-		// selectChat({ ...chat, chatId });
-		// router.push({ pathname: "/chat/[chatId]", params: { chatId } });
+		setConversation({ ...chat, chatId });
+		router.push({ pathname: "/chat/[chatId]", params: { chatId } });
 	};
 
 	const renderChat = ({ item }) => (

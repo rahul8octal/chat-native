@@ -9,9 +9,8 @@ const API_BASE = Constants?.expoConfig?.extra?.apiUrl ?? "";
 export default function useVerifyAuth() {
   const [checked, setChecked] = useState(false);
   const [validSession, setValidSession] = useState(false);
-  console.log("user1");
+
   const user = useAuthStore((s) => s.user);
-  console.log("user2", user);
   const login = useAuthStore((s) => s.login);
   const verify = useAuthStore((s) => s.verify);
   const logout = useAuthStore((s) => s.logout);

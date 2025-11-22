@@ -1,148 +1,293 @@
-import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  TextInput,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import useAuthStore from "@/store/useAuthStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useSocket } from "../../context/SocketContext";
 import {
   extractChatId,
   extractMessageText,
   extractMessageTimestamp,
   formatMessageTime,
-  getChatTitle,
+  getInitials,
 } from "../../utils/chatHelpers";
 
 export default function ChatDetail() {
   const router = useRouter();
   const params = useLocalSearchParams();
-
-  const socketContext = useSocket();
-  const socket = socketContext.socket;
-  const conversations = socketContext.conversations ?? [];
-  const messages = socketContext.messages ?? [];
-  const selectedChat = socketContext.selectedChat ?? null;
-  const selectChat = socketContext.selectChat ?? (() => {});
-  const leaveChat = socketContext.leaveChat ?? (() => {});
-  const sendMessage = socketContext.sendMessage ?? (() => {});
-  const emitTyping = socketContext.emitTyping ?? (() => {});
-  const typingUsers = socketContext.typingUsers ?? {};
-  const loadingMessages = socketContext.loadingMessages ?? false;
-  const profile = socketContext.profile ?? null;
-  const setProfile = socketContext.setProfile ?? (() => {});
-  const setMessages = socketContext.setMessages ?? (() => {});
-  const setSelectedChat = socketContext.setSelectedChat ?? (() => {});
+  const { user } = useAuthStore();
+  const {
+    socket,
+    profile,
+    setProfile,
+    conversation,
+    setConversation,
+    AllConversations,
+  } = useSocket();
 
   const [text, setText] = useState("");
+  const [isRequesting, setIsRequesting] = useState(false);
   const listRef = useRef(null);
   const typingRef = useRef(null);
+  const requestedRef = useRef({});
+  const prevChatRef = useRef(null);
 
-  const chatIdParam = Array.isArray(params.chatId) ? params.chatId[0] : params.chatId;
-  const chatId = chatIdParam || extractChatId(selectedChat) || "";
+  const chatIdParam = useMemo(
+    () => (Array.isArray(params.chatId) ? params.chatId[0] : params.chatId),
+    [params.chatId]
+  );
+  const resolvedChatId =
+    chatIdParam ||
+    extractChatId(conversation) ||
+    conversation?.receiver_id ||
+    "";
 
-  const meId = profile?.id || profile?._id || profile?.userId;
-  const typingUserId = chatId ? typingUsers[chatId] : null;
-  const showTyping = Boolean(typingUserId && typingUserId !== meId);
+  const currentConversation = useMemo(() => {
+    if (!resolvedChatId || !conversation) return null;
+    const ids = [
+      extractChatId(conversation),
+      conversation?.receiver_id,
+      conversation?.id,
+    ]
+      .filter(Boolean)
+      .map(String);
+    return ids.includes(String(resolvedChatId)) ? conversation : null;
+  }, [conversation, resolvedChatId]);
 
   useEffect(() => {
-    if (!selectedChat) {
-      setProfile(null);
-      setMessages([]);
-      setSelectedChat(null);
+    if (!resolvedChatId || currentConversation || !AllConversations?.length)
+      return;
+    const match = AllConversations.find((item) => {
+      const candidate =
+        extractChatId(item) || item.receiver_id || item.id || null;
+      return candidate && String(candidate) === String(resolvedChatId);
+    });
+    if (match) {
+      setConversation({
+        ...match,
+        chatId: extractChatId(match) || resolvedChatId,
+      });
+    }
+  }, [resolvedChatId, currentConversation, AllConversations, setConversation]);
+
+  useEffect(() => {
+    if (!resolvedChatId) return;
+    if (prevChatRef.current && prevChatRef.current === resolvedChatId) {
       return;
     }
+    prevChatRef.current = resolvedChatId;
+    setText("");
+    setConversation([]);
+    setProfile(null);
+    setIsRequesting(false);
+    if (resolvedChatId in requestedRef.current) {
+      delete requestedRef.current[resolvedChatId];
+    }
+  }, [resolvedChatId, setConversation, setProfile]);
+
+  const conversationType = currentConversation?.type || profile?.type || "user";
+  const receiverId =
+    profile?.id ||
+    currentConversation?.receiver_id ||
+    (conversationType === "group" ? resolvedChatId : null);
+
+  useEffect(() => {
+    if (!socket || !resolvedChatId || !conversationType) return;
+    if (requestedRef.current[resolvedChatId]) return;
+
+    const target = currentConversation;
+    const moduleId =
+      target?.id ||
+      target?.conversation_id ||
+      target?.chatId ||
+      target?.receiver_id ||
+      resolvedChatId;
+
+    if (!moduleId) return;
+
+    requestedRef.current[resolvedChatId] = true;
+    setIsRequesting(true);
 
     socket.emit("get-conversation", {
-      module_id: selectedChat.id,
-      type: selectedChat.type,
+      module_id: moduleId,
+      type: conversationType,
     });
-  }, [socket, selectedChat, setMessages, setProfile, setSelectedChat]);
+  }, [socket, resolvedChatId, conversationType, currentConversation]);
 
   useEffect(() => {
-    if (!chatId) return;
-    const currentSelectedId = extractChatId(selectedChat);
-    const existing = conversations.find(
-      (conversation) => extractChatId(conversation) === chatId
-    );
-
-    if (existing) {
-      if (selectedChat !== existing) {
-        selectChat(existing);
-      }
-      return;
+    if (!receiverId) return;
+    if (profile?.id === receiverId || profile?._id === receiverId) {
+      setIsRequesting(false);
     }
-
-    if (currentSelectedId !== chatId) {
-      selectChat({ chatId });
-    }
-  }, [chatId, conversations, selectChat, selectedChat]);
-
-  useEffect(
-    () => () => {
-      leaveChat();
-    },
-    [leaveChat]
-  );
+  }, [profile, receiverId]);
 
   useEffect(() => {
     if (!listRef.current) return;
     listRef.current.scrollToEnd({ animated: true });
-  }, [messages]);
+  }, [conversation]);
+
+  const emitTyping = useCallback(
+    (isTyping) => {
+      if (!socket || !receiverId) return;
+      socket.emit("typing", {
+        receiver_id: receiverId,
+        tab_type: conversationType,
+        typing: isTyping,
+      });
+    },
+    [socket, receiverId, conversationType]
+  );
 
   useEffect(() => {
     return () => {
-      if (typingRef.current) clearTimeout(typingRef.current);
-      if (chatId) emitTyping(chatId, false);
+      if (typingRef.current) {
+        clearTimeout(typingRef.current);
+      }
+      emitTyping(false);
     };
-  }, [chatId, emitTyping]);
+  }, [emitTyping]);
 
-  const title = useMemo(() => getChatTitle(selectedChat || {}), [selectedChat]);
+  useEffect(() => {
+    if (conversation?.length) {
+      setIsRequesting(false);
+    }
+  }, [conversation?.length]);
+
+  const headerSubtitle = useMemo(() => {
+    if (!profile) return "Say hi 👋";
+    if (profile.type === "group") {
+      const typingUsers = Object.values(profile.isTypingUsers || {}).filter(
+        (member) => member?.id !== user?.id
+      );
+      if (!typingUsers?.length) return "Say hi 👋";
+      if (typingUsers?.length === 1) {
+        const name =
+          typingUsers[0].username || typingUsers[0].name || "Someone";
+        return `${name} is typing...`;
+      }
+      if (typingUsers?.length === 2) {
+        const [first, second] = typingUsers;
+        const firstName = first?.username || first?.name || "Someone";
+        const secondName = second?.username || second?.name || "Someone";
+        return `${firstName} and ${secondName} are typing...`;
+      }
+      const first = typingUsers[0];
+      return `${
+        first?.username || first?.name || "Someone"
+      } and others are typing...`;
+    }
+    return profile.isTyping ? "Typing..." : "Say hi 👋";
+  }, [profile, user?.id]);
+
+  const title = useMemo(() => {
+    if (profile) {
+      return (
+        profile.group_name || profile.username || profile.name || "Conversation"
+      );
+    }
+    if (currentConversation) {
+      return (
+        currentConversation.group_name ||
+        currentConversation.username ||
+        currentConversation.name ||
+        "Conversation"
+      );
+    }
+    return "Conversation";
+  }, [profile, currentConversation]);
 
   const handleChangeText = useCallback(
     (value) => {
       setText(value);
-      if (!chatId) return;
+      const trimmed = value.trim();
 
-      if (!value.trim()) {
-        emitTyping(chatId, false);
-        if (typingRef.current) clearTimeout(typingRef.current);
+      if (!trimmed) {
+        emitTyping(false);
+        if (typingRef.current) {
+          clearTimeout(typingRef.current);
+          typingRef.current = null;
+        }
         return;
       }
 
-      emitTyping(chatId, true);
-      if (typingRef.current) clearTimeout(typingRef.current);
-      typingRef.current = setTimeout(() => emitTyping(chatId, false), 1000);
+      emitTyping(true);
+      if (typingRef.current) {
+        clearTimeout(typingRef.current);
+      }
+      typingRef.current = setTimeout(() => {
+        emitTyping(false);
+        typingRef.current = null;
+      }, 1000);
     },
-    [chatId, emitTyping]
+    [emitTyping]
   );
 
-  const handleSend = () => {
-    if (!chatId || !text.trim()) return;
-    sendMessage(chatId, text);
+  const handleSend = useCallback(() => {
+    const trimmed = text.trim();
+    if (!trimmed || !socket || !receiverId) return;
+
+    const payload = {
+      message: trimmed,
+      receiver_id: receiverId,
+      tab_type: conversationType,
+      type: "text",
+    };
+
+    if (currentConversation?.id) {
+      payload.conversation_id = currentConversation.id;
+    }
+    if (currentConversation?.chatId) {
+      payload.chatId = currentConversation.chatId;
+    }
+
+    socket.emit("send-message", payload);
     setText("");
-    emitTyping(chatId, false);
+    emitTyping(false);
     if (typingRef.current) {
       clearTimeout(typingRef.current);
       typingRef.current = null;
     }
-  };
+  }, [
+    text,
+    socket,
+    receiverId,
+    conversationType,
+    currentConversation,
+    emitTyping,
+  ]);
 
   const renderMessage = ({ item }) => {
-    const senderId = item?.senderId || item?.userId || item?.from;
-    const isMine = senderId && meId ? senderId === meId : item?.isMine;
+    const senderId =
+      item?.sender_id ||
+      item?.senderId ||
+      item?.userId ||
+      item?.from ||
+      item?.sender?.id;
+    const myId = user?.id;
+    const isMine = myId ? senderId === myId : item?.isMine;
     const body = extractMessageText(item);
-    const timestamp = formatMessageTime(extractMessageTimestamp(item));
+    const timestamp = formatMessageTime(
+      extractMessageTimestamp(item) ||
+        item?.sendedAt ||
+        item?.created_at ||
+        null
+    );
 
     return (
-      <View className={`my-1 flex-row ${isMine ? "justify-end" : "justify-start"}`}>
+      <View
+        className={`my-1 flex-row ${isMine ? "justify-end" : "justify-start"}`}
+      >
         <View
           className={`max-w-[80%] rounded-2xl px-3 py-2 ${
             isMine ? "bg-green-600" : "bg-gray-100"
@@ -165,22 +310,64 @@ export default function ChatDetail() {
     );
   };
 
+  console.log("conversation", conversation);
+  console.log("isRequesting", isRequesting);
+
+  const shouldShowLoader = isRequesting && !conversation?.length;
+
+  const ChatHeaderAvatar = () => {
+    const avatar =
+      profile?.profile_image ||
+      profile?.group_image ||
+      currentConversation?.profile_image ||
+      currentConversation?.group_image;
+    const name = title;
+    const initials = getInitials(name);
+
+    if (avatar) {
+      return (
+        <Image
+          source={{ uri: avatar }}
+          className="w-10 h-10 rounded-full bg-gray-200"
+        />
+      );
+    }
+
+    return (
+      <View className="w-10 h-10 rounded-full bg-green-100 items-center justify-center">
+        <Text className="text-green-800 font-semibold text-sm">{initials}</Text>
+      </View>
+    );
+  };
+
+  const EmptyChat = () => (
+    <View className="flex-1 items-center justify-center py-10">
+      <View className="w-24 h-24 bg-green-50 rounded-full items-center justify-center mb-4">
+        <Ionicons name="chatbubbles-outline" size={40} color="#16a34a" />
+      </View>
+      <Text className="text-gray-800 text-lg font-semibold mb-2">
+        No messages yet
+      </Text>
+      <Text className="text-gray-500 text-center px-10">
+        Send a message to start the conversation!
+      </Text>
+    </View>
+  );
+
   return (
     <SafeAreaView className="flex-1 bg-white">
       <View className="flex-row items-center px-4 py-3 border-b border-gray-100">
-        <TouchableOpacity
-          onPress={() => router.back()}
-          className="w-10 h-10 rounded-full items-center justify-center bg-gray-100"
-        >
-          <Ionicons name="chevron-back" size={22} color="#16a34a" />
+        <TouchableOpacity onPress={() => router.back()} className="mr-3">
+          <Ionicons name="chevron-back" size={28} color="#16a34a" />
         </TouchableOpacity>
+
+        <ChatHeaderAvatar />
+
         <View className="ml-3 flex-1">
           <Text className="text-lg font-semibold" numberOfLines={1}>
             {title}
           </Text>
-          <Text className="text-xs text-gray-500">
-            {showTyping ? "Typing..." : "Say hi 👋"}
-          </Text>
+          <Text className="text-xs text-gray-500">{headerSubtitle}</Text>
         </View>
         <TouchableOpacity className="pl-3">
           <Ionicons name="call-outline" size={22} color="#16a34a" />
@@ -196,7 +383,7 @@ export default function ChatDetail() {
         keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
       >
         <View className="flex-1 px-4 py-3">
-          {loadingMessages ? (
+          {shouldShowLoader ? (
             <View className="flex-1 items-center justify-center">
               <ActivityIndicator color="#16a34a" />
               <Text className="text-gray-500 text-sm mt-2">
@@ -206,21 +393,16 @@ export default function ChatDetail() {
           ) : (
             <FlatList
               ref={listRef}
-              data={messages}
+              data={conversation}
               renderItem={renderMessage}
               keyExtractor={(item, index) =>
                 String(item?.id || item?._id || index)
               }
-              contentContainerStyle={{ paddingBottom: 20 }}
+              contentContainerStyle={{ paddingBottom: 20, flexGrow: 1 }}
               keyboardShouldPersistTaps="handled"
+              ListEmptyComponent={EmptyChat}
             />
           )}
-
-          {showTyping ? (
-            <View className="mt-2">
-              <Text className="text-xs text-gray-500 italic">Typing...</Text>
-            </View>
-          ) : null}
         </View>
 
         <View className="px-4 pb-5 pt-2 bg-white border-t border-gray-100">
