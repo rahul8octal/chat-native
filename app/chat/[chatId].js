@@ -29,13 +29,14 @@ export default function ChatDetail() {
   const { user } = useAuthStore();
   const {
     socket,
+    chats,
     profile,
     setProfile,
     conversation,
     setConversation,
     AllConversations,
   } = useSocket();
-
+  
   const [text, setText] = useState("");
   const [isRequesting, setIsRequesting] = useState(false);
   const listRef = useRef(null);
@@ -102,28 +103,28 @@ export default function ChatDetail() {
     currentConversation?.receiver_id ||
     (conversationType === "group" ? resolvedChatId : null);
 
-  useEffect(() => {
-    if (!socket || !resolvedChatId || !conversationType) return;
-    if (requestedRef.current[resolvedChatId]) return;
+  // useEffect(() => {
+  //   if (!socket || !resolvedChatId || !conversationType) return;
+  //   if (requestedRef.current[resolvedChatId]) return;
 
-    const target = currentConversation;
-    const moduleId =
-      target?.id ||
-      target?.conversation_id ||
-      target?.chatId ||
-      target?.receiver_id ||
-      resolvedChatId;
+  //   const target = currentConversation;
+  //   const moduleId =
+  //     target?.id ||
+  //     target?.conversation_id ||
+  //     target?.chatId ||
+  //     target?.receiver_id ||
+  //     resolvedChatId;
 
-    if (!moduleId) return;
+  //   if (!moduleId) return;
 
-    requestedRef.current[resolvedChatId] = true;
-    setIsRequesting(true);
+  //   requestedRef.current[resolvedChatId] = true;
+  //   setIsRequesting(true);
 
-    socket.emit("get-conversation", {
-      module_id: moduleId,
-      type: conversationType,
-    });
-  }, [socket, resolvedChatId, conversationType, currentConversation]);
+  //   socket.emit("get-conversation", {
+  //     module_id: moduleId,
+  //     type: conversationType,
+  //   });
+  // }, [socket, resolvedChatId, conversationType, currentConversation]);
 
   useEffect(() => {
     if (!receiverId) return;
@@ -159,10 +160,10 @@ export default function ChatDetail() {
   }, [emitTyping]);
 
   useEffect(() => {
-    if (conversation?.length) {
+    if (chats?.length) {
       setIsRequesting(false);
     }
-  }, [conversation?.length]);
+  }, [chats?.length]);
 
   const headerSubtitle = useMemo(() => {
     if (!profile) return "Say hi 👋";
@@ -313,7 +314,7 @@ export default function ChatDetail() {
   console.log("conversation", conversation);
   console.log("isRequesting", isRequesting);
 
-  const shouldShowLoader = isRequesting && !conversation?.length;
+  const shouldShowLoader = isRequesting && !chats?.length;
 
   const ChatHeaderAvatar = () => {
     const avatar =
@@ -393,7 +394,7 @@ export default function ChatDetail() {
           ) : (
             <FlatList
               ref={listRef}
-              data={conversation}
+              data={chats}
               renderItem={renderMessage}
               keyExtractor={(item, index) =>
                 String(item?.id || item?._id || index)

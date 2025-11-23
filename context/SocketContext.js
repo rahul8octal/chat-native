@@ -2,6 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useRef, useSt
 import { unstable_batchedUpdates } from "react-native";
 import socket from "@/lib/socket";
 import useAuthStore from "@/store/useAuthStore";
+import useControllerStore from "@/store/useControllerStore";
 
 const SocketContext = createContext(null);
 
@@ -16,6 +17,7 @@ export const SocketProvider = ({ children }) => {
   const [statuses, setStatuses] = useState([]);
   const [selectedProfileDetail, setSelectedProfileDetail] = useState(null);
   const [selectedProfileId, setSelectedProfileId] = useState(null);
+  const selectedChat = useControllerStore((state) => state.selectedChat);
 
   const typingTimeouts = useRef({
     user: {},
@@ -112,6 +114,7 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     socket.on("user-conversation", (data) => {
+      console.log(data, 'chats')
       setProfile(() => {
         const profile = data?.profile;
         if (!profile) return null;
@@ -294,6 +297,20 @@ export const SocketProvider = ({ children }) => {
     maybeAppendChat,
     handleToastAndDelivery,
   ]);
+
+  useEffect(() => {
+    if (!selectedChat) {
+      setProfile(null);
+      setChats([]);
+      setConversation(null);
+      return;
+    }
+
+    socket.emit("get-conversation", {
+      module_id: selectedChat.id,
+      type: selectedChat.type,
+    });
+  }, [socket, selectedChat, setChats, setProfile, setConversation]);
 
   const handleTyping = useCallback(
     (data) => {

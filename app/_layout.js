@@ -4,11 +4,11 @@ import { SocketProvider } from "../context/SocketContext";
 import "./global.css";
 
 export default function RootLayout() {
-	return (
-		<SafeAreaProvider>
-			<SocketProvider>
-				<Stack screenOptions={{ headerShown: false }} />
-			</SocketProvider>
-		</SafeAreaProvider>
-	);
+  return (
+    <SafeAreaProvider>
+      <SocketProvider>
+        <Stack screenOptions={{ headerShown: false }} />
+      </SocketProvider>
+    </SafeAreaProvider>
+  );
 }
