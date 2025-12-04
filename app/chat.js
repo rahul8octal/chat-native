@@ -8,6 +8,9 @@ import Entypo from '@expo/vector-icons/Entypo';
 import background from '@/assets/background2.jpg';
 import React, { useState } from "react";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import Feather from "@expo/vector-icons/Feather";
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+
 export default function Chat() {
   const router = useRouter();
   const [search, setSearch] = useState("");
@@ -88,7 +91,7 @@ export default function Chat() {
           </View>
           
         </View>
-        <View className="flex-row items-center bg-white  mx-4 my-4 px-3  rounded-2xl mt-2">
+        <View className="flex-row items-center bg-white  mx-3 my-4 px-3  rounded-2xl mt-2">
         <TouchableOpacity onPress={() => setSearch("")}>
             <MaterialCommunityIcons name="sticker-emoji" size={24} color="black" />
             </TouchableOpacity>
@@ -98,11 +101,16 @@ export default function Chat() {
             value={search}
             onChangeText={setSearch}
             className="flex-1 px-2  text-base "
-          />
+          /> 
+           <TouchableOpacity onPress={() => setSearch("")} className="mr-2" >
+            <FontAwesome name="rupee" size={22} color="black" />
+            </TouchableOpacity>
+           <TouchableOpacity onPress={() => setSearch("")}>
 
+        <Feather name="camera" size={24} color="black" />
+          </TouchableOpacity> 
            
-           
-          
+        
         </View>
 
       </SafeAreaView>
