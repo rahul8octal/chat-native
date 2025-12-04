@@ -40,14 +40,14 @@ export default function Chat() {
 
             <View className="ml-3">
               <Text className="text-lg font-bold">Urvisha</Text>
-              <Text className="text-gray-600 text-xs">last seen today..</Text>
+              <Text className="text-gray-600 text-xs">last seen today..</Text> 
             </View>
           </View>
 
           <View className="flex-row items-center  mr-3">
             <AntDesign name="video-camera" className="mr-2" size={22} color="black" />
             <Ionicons name="call-outline"  size={22} color="black" />
-            <Entypo name="dots-three-vertical" size={22} color="black" />
+            <MaterialCommunityIcons name="dots-vertical" size={24} color="black" />
           </View>
         </View>
 
@@ -69,7 +69,7 @@ export default function Chat() {
         <View className=" pl-5 w-40 h-10"><Text className="text-xl bg-green-300 pl-5 rounded-xl">hello...</Text></View>
           <View className="mt-10 ml-24 w-40 h-10 pl-5" ><Text  className="text-xl bg-green-300 pl-5 rounded-xl">helloo..</Text></View>
           </View>
-          <View className="flex-row">
+          <View className="flex-row"> <Entypo name="dots-three-vertical" size={22} color="black" />
         <View className=" pl-5 w-40 h-10"><Text className="text-xl bg-green-300 pl-5 rounded-xl">hello...</Text></View>
           <View className="mt-10 ml-24 w-40 h-10 pl-5" ><Text  className="text-xl bg-green-300 pl-5 rounded-xl">helloo..</Text></View>
           </View>

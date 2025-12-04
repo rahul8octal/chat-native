@@ -1,4 +1,6 @@
-
-/node_modules
-.expo
-.vscode
+
+/node_modules
+.expo
+.vscode
+config.bat
+.env
