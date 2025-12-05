@@ -311,9 +311,6 @@ export default function ChatDetail() {
     );
   };
 
-  console.log("conversation", conversation);
-  console.log("isRequesting", isRequesting);
-
   const shouldShowLoader = isRequesting && !chats?.length;
 
   const ChatHeaderAvatar = () => {

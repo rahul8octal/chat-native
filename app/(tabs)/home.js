@@ -187,7 +187,6 @@ export default function Home() {
   const handleOpenChat = (chat) => {
     const chatId = chat?.receiver_id;
     if (!chatId) return;
-    console.log(chat, "ssafe");
     onChatSelect({ id: chatId, type: chat?.type });
     router.push({ pathname: "/chat/[chatId]", params: { chatId } });
   };

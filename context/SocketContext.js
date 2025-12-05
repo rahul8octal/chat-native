@@ -114,7 +114,6 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     socket.on("user-conversation", (data) => {
-      console.log(data, 'chats')
       setProfile(() => {
         const profile = data?.profile;
         if (!profile) return null;

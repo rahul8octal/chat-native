@@ -22,7 +22,6 @@ export default function useVerifyAuth() {
     async function verifyAuth() {
       try {
         const token = await AsyncStorage.getItem("token");
-        console.log("token in useVerifyAuth", token);
 
         if (!token) {
           // no token -> redirect to login (store.gotologin will clear token and route)

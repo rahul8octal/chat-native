@@ -102,7 +102,6 @@ export default function Signup() {
       const apiError =
         typeof error === "object" && error !== null ? error : { response: null };
       const apiMessage = apiError?.response?.data?.message;
-      console.log(apiError?.response?.data || apiError);
       Alert.alert("Signup Failed", apiMessage || "Try again!");
     } finally {
       setLoading(false);
