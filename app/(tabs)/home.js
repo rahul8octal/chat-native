@@ -19,6 +19,7 @@ import {
   formatMessageTime,
   getInitials,
 } from "../../utils/chatHelpers";
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 const getConversationName = (chat) =>
   chat.group_name || chat.username || "Conversation";
@@ -277,12 +278,13 @@ export default function Home() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       {/* HEADER */}
-      <View className="flex-row items-center justify-between px-4 mt-2">
-        <Text className="text-3xl font-bold text-green-700">Chats</Text>
+      <View className="flex-row items-center justify-between px-4 mt-4">
+        <Text className="text-3xl font-bold text-green-700 ml-2">Chats</Text>
 
         <View className="flex-row space-x-5 items-center">
-          <Ionicons name="camera-outline" size={23} color="black" />
-          <Ionicons name="ellipsis-vertical" size={23} color="black" />
+        <TouchableOpacity>
+          <Ionicons name="camera-outline" size={24} color="black" />
+          </TouchableOpacity>
           <TouchableOpacity
             accessibilityRole="button"
             onPress={handleLogout}
@@ -290,6 +292,10 @@ export default function Home() {
           >
             <Text className="text-red-600 text-sm font-semibold">Logout</Text>
           </TouchableOpacity>
+          <TouchableOpacity>
+          <MaterialCommunityIcons name="dots-vertical" size={24} color="black" />
+       </TouchableOpacity>
+        
         </View>
       </View>
 
@@ -338,7 +344,7 @@ export default function Home() {
       {/* FLOATING BUTTONS */}
       <View className="absolute bottom-12 right-5 items-end space-y-3">
         <TouchableOpacity className="bg-green-600 p-4 rounded-full shadow-lg">
-          <Ionicons name="chatbubbles-outline" size={26} color="white" />
+         <Ionicons name="add-circle-outline" size={24} color="white" />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
