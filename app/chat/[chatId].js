@@ -12,6 +12,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  ImageBackground,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSocket } from "../../context/SocketContext";
@@ -22,6 +23,7 @@ import {
   formatMessageTime,
   getInitials,
 } from "../../utils/chatHelpers";
+
 
 export default function ChatDetail() {
   const router = useRouter();
@@ -286,6 +288,8 @@ export default function ChatDetail() {
     );
 
     return (
+       
+                
       <View
         className={`my-1 flex-row ${isMine ? "justify-end" : "justify-start"}`}
       >
@@ -308,6 +312,7 @@ export default function ChatDetail() {
           ) : null}
         </View>
       </View>
+     
     );
   };
 
@@ -354,6 +359,7 @@ export default function ChatDetail() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
+      
       <View className="flex-row items-center px-4 py-3 border-b border-gray-100">
         <TouchableOpacity onPress={() => router.back()} className="mr-3">
           <Ionicons name="chevron-back" size={28} color="#16a34a" />
@@ -380,6 +386,14 @@ export default function ChatDetail() {
         className="flex-1"
         keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
       >
+
+        <ImageBackground
+                source={{
+                  uri: "https://t3.ftcdn.net/jpg/01/99/79/88/360_F_199798806_PAFfWGapie6Mk8igqKHbhIIa9LwQcvQr.jpg",
+                }}
+                className="flex-1"
+                resizeMode="cover"
+              >
         <View className="flex-1 px-4 py-3">
           {shouldShowLoader ? (
             <View className="flex-1 items-center justify-center">
@@ -402,6 +416,7 @@ export default function ChatDetail() {
             />
           )}
         </View>
+          </ImageBackground>
 
         <View className="px-4 pb-5 pt-2 bg-white border-t border-gray-100">
           <View className="flex-row items-center space-x-3 bg-gray-100 rounded-full px-3 py-2">
@@ -429,6 +444,8 @@ export default function ChatDetail() {
           </View>
         </View>
       </KeyboardAvoidingView>
+      
+   
     </SafeAreaView>
   );
 }

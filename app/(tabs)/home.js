@@ -73,6 +73,10 @@ export default function Home() {
     gotoLogin();
   };
 
+  const openContacts = () => {
+    router.push({ pathname: "/contacts" });
+  };
+
   const getMessagePreview = useCallback(
     (chat) => {
       const currentUserId = user?.id;
@@ -197,10 +201,10 @@ export default function Home() {
       onPress={() => handleOpenChat(item)}
       className="flex-row justify-between items-center py-3 border-b border-gray-200"
     >
-      <View className="flex-row items-center space-x-3 flex-1">
+      <View className="flex-row  items-center space-x-3 flex-1">
         <ChatAvatar chat={item} />
 
-        <View className="flex-1">
+        <View className="flex-1 ml-3">
           <Text className="text-lg font-semibold" numberOfLines={1}>
             {getConversationName(item)}
           </Text>
@@ -343,7 +347,9 @@ export default function Home() {
 
       {/* FLOATING BUTTONS */}
       <View className="absolute bottom-12 right-5 items-end space-y-3">
-        <TouchableOpacity className="bg-green-600 p-4 rounded-full shadow-lg">
+        <TouchableOpacity  
+         onPress={() => openContacts()}
+         className="bg-green-600 p-4 rounded-full shadow-lg">
          <Ionicons name="add-circle-outline" size={24} color="white" />
         </TouchableOpacity>
       </View>
