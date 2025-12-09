@@ -19,7 +19,7 @@ import {
   formatMessageTime,
   getInitials,
 } from "../../utils/chatHelpers";
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 const getConversationName = (chat) =>
   chat.group_name || chat.username || "Conversation";
@@ -168,17 +168,19 @@ export default function Home() {
     const term = search.trim().toLowerCase();
     let list = AllConversations;
 
-    // if (term) {
-    //   list = list.filter((chat) => getConversationName(chat).toLowerCase().includes(term));
-    // }
+    if (term) {
+      list = list.filter((chat) =>
+        getConversationName(chat).toLowerCase().includes(term)
+      );
+    }
 
     switch (activeFilter) {
       case "Unread":
         list = list.filter((chat) => (chat.sentCount || 0) > 0);
         break;
-      // case "Favorite":
-      //   list = list.filter((chat) => chat.isFavorite);
-      //   break;
+      case "Favorite":
+        list = list.filter((chat) => chat.isFavorite);
+        break;
       case "Group":
         list = list.filter((chat) => chat.type === "group");
         break;
@@ -286,8 +288,8 @@ export default function Home() {
         <Text className="text-3xl font-bold text-green-700 ml-2">Chats</Text>
 
         <View className="flex-row space-x-5 items-center">
-        <TouchableOpacity>
-          <Ionicons name="camera-outline" size={24} color="black" />
+          <TouchableOpacity>
+            <Ionicons name="camera-outline" size={24} color="black" />
           </TouchableOpacity>
           <TouchableOpacity
             accessibilityRole="button"
@@ -297,9 +299,12 @@ export default function Home() {
             <Text className="text-red-600 text-sm font-semibold">Logout</Text>
           </TouchableOpacity>
           <TouchableOpacity>
-          <MaterialCommunityIcons name="dots-vertical" size={24} color="black" />
-       </TouchableOpacity>
-        
+            <MaterialCommunityIcons
+              name="dots-vertical"
+              size={24}
+              color="black"
+            />
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -347,10 +352,11 @@ export default function Home() {
 
       {/* FLOATING BUTTONS */}
       <View className="absolute bottom-12 right-5 items-end space-y-3">
-        <TouchableOpacity  
-         onPress={() => openContacts()}
-         className="bg-green-600 p-4 rounded-full shadow-lg">
-         <Ionicons name="add-circle-outline" size={24} color="white" />
+        <TouchableOpacity
+          onPress={() => openContacts()}
+          className="bg-green-600 p-4 rounded-full shadow-lg"
+        >
+          <Ionicons name="add-circle-outline" size={24} color="white" />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
