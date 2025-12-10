@@ -287,6 +287,8 @@ export default function ChatDetail() {
         null
     );
 
+   
+
     return (
        
                 
@@ -357,6 +359,10 @@ export default function ChatDetail() {
     </View>
   );
 
+  const openProfile = () => {
+    router.push({ pathname: "/profile" });
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-white">
       
@@ -365,8 +371,11 @@ export default function ChatDetail() {
           <Ionicons name="chevron-back" size={28} color="#16a34a" />
         </TouchableOpacity>
 
+        <TouchableOpacity onPress={openProfile}>
+
         <ChatHeaderAvatar />
 
+        </TouchableOpacity>
         <View className="ml-3 flex-1">
           <Text className="text-lg font-semibold" numberOfLines={1}>
             {title}
