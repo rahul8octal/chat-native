@@ -1,49 +1,43 @@
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { View, Text, TouchableOpacity, Image, FlatList } from "react-native";
+import { View, Text, TouchableOpacity, Image, FlatList,ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import FontAwesome from '@expo/vector-icons/FontAwesome';
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 
 const DATA = [
   {
-    id:1,
-    name: 'Rahul',
-    message:'Be happy',
-    contact: '95745 15762',
-    url:'data:image/jpeg;base64,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'
+    id: 1,
+    name: "Rahul",
+    message: "Be happy",
+    contact: "95745 15762",
+    url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQU0c3V2uvL-cJ1mHLYvzcol2EJWw8DxMiJIw&s",
   },
-  
-
 ];
 
 export default function Profile() {
-
-  const Item = ({data}) => (
-    
+  const Item = ({ data }) => (
     <View className="items-center  gap-3">
-        <View>
-          <Image
-            source={{
-              uri: data.url,
-            }}
-            className="w-28 h-28 rounded-full bg-gray-200"
-          />
-        </View>
-        <View className="items-center">
-          <Text className="font-semibold text-2xl">{data.name}</Text>
-          <Text className="text-xl">{data.contact}</Text>
-          <Text className="text-xl">{data.message}</Text>
-       
-        </View>
+      <View>
+        <Image
+          source={{
+            uri: data.url,
+          }}
+          className="w-28 h-28 rounded-full bg-gray-200"
+        />
       </View>
+      <View className="items-center">
+        <Text className="font-semibold text-2xl">{data.name}</Text>
+        <Text className="text-xl">{data.contact}</Text>
+        <Text className="text-xl">{data.message}</Text>
+      </View>
+    </View>
   );
-
 
   return (
     <SafeAreaView className="  ">
-     
+      
       <View className="flex-row  px-4 py-3  justify-between bg-white">
         <View>
           <TouchableOpacity
@@ -51,121 +45,278 @@ export default function Profile() {
             className="mr-3 flex-row"
           >
             <Ionicons name="chevron-back" size={28} color="#16a34a" />
-            
           </TouchableOpacity>
         </View>
 
         <View className="flex-row ">
-       
           <TouchableOpacity>
+            <Text>
+
             <MaterialCommunityIcons
               name="dots-vertical"
               size={24}
               color="black"
             />
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
-      
-
- <View className="bg-white items-center pb-4">
-      <FlatList
-        data={DATA}
-        renderItem={({item}) => <Item data={item} />}
-        keyExtractor={item => item.id}
-      />
-      
-      
-      <View className=" flex-row mt-2 gap-3 items-center   ">
-        <View className="border border-gray-300 pt-3 pb-3 pr-6 pl-6 rounded-xl items-center">
-          <View>
-               
-            <Ionicons name="call-outline" size={25} color="#16a34a" />
-           
-            </View>
-          <View><Text>Audio</Text></View>
-        </View >
-        <View className="border border-gray-300 pt-3 pb-3 pr-6 pl-6 rounded-xl items-center ">
-        <View>
-          <Text>
-          <MaterialCommunityIcons name="video-outline" size={26} color="#16a34a" />
-          </Text></View>
-        <View><Text>Video</Text></View>
-        </View>
-
-        <View className="border border-gray-300 pt-3 pb-3 pr-6 pl-6 rounded-xl items-center">
-        <View> <FontAwesome name="rupee" size={22} color="#16a34a" /></View>
-        <View><Text>Pay</Text></View>
-        </View>
-        <View className="border border-gray-300 pt-3 pb-3 pr-6 pl-6 rounded-xl items-center">
-        <View><Ionicons name="search" size={25} color="#16a34a" /></View>
-        <View><Text>Search</Text></View>
-        </View>
-
-      </View>
-
-     </View>
-      
-      
-      <View className="bg-white mt-4">
-  
-      <View className="mt-2 ">
-      <View className="pt-3 pb-3 pr-6 pl-6 flex-row gap-4">
-        <View><Ionicons name="notifications-outline" size={24} color="black" /></View>
-        <View><Text>Notifications</Text></View>
-        </View>
-      </View>
-
-      <View className="mt-2 ">
-      <View className="pt-3 pb-3 pr-6 pl-6 flex-row gap-4">
-        <View><MaterialCommunityIcons name="image-outline" size={24} color="black" /></View>
-        <View><Text>Media Visibility</Text></View>
-        </View>
-      </View>
-    
-      <View className="mt-2 ">
-      <View className="pt-3 pb-3 pr-6 pl-6 flex-row gap-4">
-        <View><MaterialCommunityIcons name="star-outline" size={24} color="black" /></View>
-        <View><Text>Starred Messages</Text></View>
-        </View>
-      </View>
 
 
-      </View>
-      
-      <View className="bg-white mt-4">
-  
-  <View className="mt-2 ">
-  <View className="pt-3 pb-3 pr-6 pl-6 flex-row gap-4">
-    <View><MaterialCommunityIcons name="lock-outline" size={24} color="black" /></View>
-    <View><Text>Encryption</Text></View>
-    </View>
-  </View>
-
-  <View className="mt-2 ">
-  <View className="pt-3 pb-3 pr-6 pl-6 flex-row gap-4">
-    <View><MaterialCommunityIcons name="progress-clock" size={24} color="black" /></View>
-    <View><Text>Disapearing messages</Text></View>
-    </View>
-  </View>
-
-  <View className="mt-2 ">
-  <View className="pt-3 pb-3 pr-6 pl-6 flex-row gap-4">
-    <View><MaterialCommunityIcons name="message-text-lock-outline" size={24} color="black" /></View>
-    <View><Text>Chat Lock</Text></View>
-    </View>
-  </View>
-  <View className="mt-2 ">
-  <View className="pt-3 pb-3 pr-6 pl-6 flex-row gap-4">
-    <View><MaterialIcons name="privacy-tip" size={24} color="black" /></View>
-    <View><Text>Advanced Chat privacy</Text></View>
-    </View>
-  </View>
-
-
-  </View>
+      <ScrollView>
 
      
+      <View className="bg-white items-center pb-4">
+        <FlatList
+          data={DATA}
+          renderItem={({ item }) => <Item data={item} />}
+          keyExtractor={(item) => item.id}
+        />
+
+        <View className="flex-row mt-2 gap-3 items-center   ">
+          <View className="border border-gray-300 pt-3 pb-3 pr-6 pl-6 rounded-xl items-center">
+            <View>
+              <Text>
+                <Ionicons name="call-outline" size={25} color="#16a34a" />
+              </Text>
+            </View>
+            <View>
+              <Text>Audio</Text>
+            </View>
+          </View>
+          <View className="border border-gray-300 pt-3 pb-3 pr-6 pl-6 rounded-xl items-center ">
+            <View>
+              <Text>
+                <MaterialCommunityIcons
+                  name="video-outline"
+                  size={26}
+                  color="#16a34a"
+                />
+              </Text>
+            </View>
+            <View>
+              <Text>Video</Text>
+            </View>
+          </View>
+
+          <View className="border border-gray-300 pt-3 pb-3 pr-6 pl-6 rounded-xl items-center">
+            <View>
+              <Text>
+                <FontAwesome name="rupee" size={22} color="#16a34a" />
+              </Text>
+            </View>
+            <View>
+              <Text>Pay</Text>
+            </View>
+          </View>
+          <View className="border border-gray-300 pt-3 pb-3 pr-6 pl-6 rounded-xl items-center">
+            <View>
+              <Text>
+                <Ionicons name="search" size={25} color="#16a34a" />
+              </Text>
+            </View>
+            <View>
+              <Text>Search</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+     
+     
+     
+   
+      <View className="bg-white mt-4">
+        <View className="mt-2 ">
+          <View className="pt-3 pb-3 pr-6 pl-6 flex-row gap-4">
+            <View>
+              <Text>
+                <Ionicons
+                  name="notifications-outline"
+                  size={24}
+                  color="black"
+                />
+              </Text>
+            </View>
+            <View className="flex-row">
+              <Text>Notifications</Text>
+              {/* <Text>2</Text> */}
+            </View>
+          </View>
+        </View>
+
+        <View className="mt-2 ">
+          <View className="pt-3 pb-3 pr-6 pl-6 flex-row gap-4">
+            <View>
+              <Text>
+                <MaterialCommunityIcons
+                  name="image-outline"
+                  size={24}
+                  color="black"
+                />
+              </Text>
+            </View>
+            <View>
+              <Text>Media Visibility</Text>
+            </View>
+          </View>
+        </View>
+
+        <View className="mt-2 ">
+          <View className="pt-3 pb-3 pr-6 pl-6 flex-row gap-4">
+            <View>
+              <Text>
+                <MaterialCommunityIcons
+                  name="star-outline"
+                  size={24}
+                  color="black"
+                />
+              </Text>
+            </View>
+            <View>
+              <Text>Starred Messages</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+
+      <View className="bg-white mt-4 mb-5">
+        <View className="mt-2 mr-4 ">
+          <View className="pt-3 pb-3 pr-6 pl-6 flex-row gap-4">
+            <View>
+              <Text>
+                <MaterialCommunityIcons
+                  name="lock-outline"
+                  size={24}
+                  color="black"
+                />
+              </Text>
+            </View>
+            <View>
+              <Text>Encryption</Text>
+              <Text>Messages and calls are end-to-end encrypted.Tap to varify.</Text>
+            </View>
+          </View>
+        </View>
+    
+        <View className="mt-2  ">
+          <View className="pt-3 pb-3 pr-6 pl-6 flex-row gap-4">
+            <View>
+              <Text>
+                <MaterialCommunityIcons
+                  name="progress-clock"
+                  size={24}
+                  color="black"
+                />
+              </Text>
+            </View>
+            <View>
+              <Text>Disapearing messages</Text>
+              <Text>Off</Text>
+            </View>
+          </View>
+        </View>
+
+        <View className="mt-2 ">
+          <View className="pt-3 pb-3 pr-6 pl-6 flex-row gap-4">
+            <View>
+              <Text>
+                <MaterialCommunityIcons
+                  name="message-text-lock-outline"
+                  size={24}
+                  color="black"
+                />
+              </Text>
+            </View>
+            <View>
+              <Text>Chat Lock</Text>
+              <Text>Lock and hide theschat on thesdevice.</Text>
+            </View>
+          </View>
+        </View>
+        <View className="mt-2 ">
+          <View className="pt-3 pb-3 pr-6 pl-6 flex-row gap-4">
+            <View>
+              <Text>
+                <MaterialIcons name="privacy-tip" size={24} color="black" />
+              </Text>
+            </View>
+            <View>
+              <Text>Advanced Chat privacy</Text>
+              <Text>
+                Off
+              </Text>
+            </View>
+          </View>
+        </View>
+        </View>
+        <View className="bg-white mt-4 mb-5">
+        <View className="mt-2 mr-4 ">
+          <View className="pt-3 pb-3 pr-6 pl-6 flex-row gap-4">
+            <View>
+              <Text>
+                <MaterialCommunityIcons
+                  name="lock-outline"
+                  size={24}
+                  color="black"
+                />
+              </Text>
+            </View>
+            <View>
+              <Text>Add to favourite</Text>
+            </View>
+          </View>
+        </View>
+
+        <View className="mt-2  ">
+          <View className="pt-3 pb-3 pr-6 pl-6 flex-row gap-4">
+            <View>
+              <Text>
+                <MaterialCommunityIcons
+                  name="progress-clock"
+                  size={24}
+                  color="black"
+                />
+              </Text>
+            </View>
+            <View>
+              <Text>Add to list </Text>
+            </View>
+          </View>
+        </View>
+        <View className="mt-2  ">
+          <View className="pt-3 pb-3 pr-6 pl-6 flex-row gap-4">
+            <View>
+              <Text>
+                <MaterialCommunityIcons
+                  name="progress-clock"
+                  size={24}
+                  color="black"
+                />
+              </Text>
+            </View>
+            <View>
+              <Text>Block </Text>
+            </View>
+          </View>
+        </View>
+        <View className="mt-2  ">
+          <View className="pt-3 pb-3 pr-6 pl-6 flex-row gap-4">
+            <View>
+              <Text>
+                <MaterialCommunityIcons
+                  name="progress-clock"
+                  size={24}
+                  color="black"
+                />
+              </Text>
+            </View>
+            <View>
+              <Text>Report</Text>
+            </View>
+          </View>
+      </View>
+      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

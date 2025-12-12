@@ -20,6 +20,7 @@ import {
   getInitials,
 } from "../../utils/chatHelpers";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { openSettings } from "expo-linking";
 
 const getConversationName = (chat) =>
   chat.group_name || chat.username || "Conversation";
@@ -75,6 +76,9 @@ export default function Home() {
 
   const openContacts = () => {
     router.push({ pathname: "/contacts" });
+  };
+  const openSetting = () => {
+    router.push({ pathname: "../chat/setting" });
   };
 
   const getMessagePreview = useCallback(
@@ -269,6 +273,7 @@ export default function Home() {
       );
     }
 
+    
     return (
       <FlatList
         data={filteredChats}
@@ -298,7 +303,9 @@ export default function Home() {
           >
             <Text className="text-red-600 text-sm font-semibold">Logout</Text>
           </TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity 
+                onPress={() => openSetting()}
+          >
             <MaterialCommunityIcons
               name="dots-vertical"
               size={24}
@@ -308,7 +315,7 @@ export default function Home() {
         </View>
       </View>
 
-      {/* SEARCH BAR */}
+   
       <View className="mx-4 mt-3 mb-2">
         <View className="flex-row items-center bg-gray-100 rounded-full px-4 py-2">
           <Ionicons name="search-outline" size={20} color="gray" />
