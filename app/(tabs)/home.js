@@ -195,7 +195,10 @@ export default function Home() {
     const chatId = chat?.receiver_id;
     if (!chatId) return;
     onChatSelect({ id: chatId, type: chat?.type });
-    router.push({ pathname: "/chat/[chatId]", params: { chatId } });
+    router.push({
+      pathname: "/chat/[chatId]",
+      params: { chatId, type: chat?.type },
+    });
   };
 
   const renderChat = ({ item }) => (
