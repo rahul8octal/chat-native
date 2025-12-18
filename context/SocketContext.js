@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { unstable_batchedUpdates } from "react-native";
-import socket from "@/lib/socket";
+import socket, { connectSocketWithToken } from "@/lib/socket";
 import useAuthStore from "@/store/useAuthStore";
 import useControllerStore from "@/store/useControllerStore";
 
@@ -23,6 +23,12 @@ export const SocketProvider = ({ children }) => {
     user: {},
     group: {},
   });
+
+  useEffect(() => {
+    if (user) {
+      connectSocketWithToken().catch(console.error);
+    }
+  }, [user]);
 
   useEffect(() => {
     setAllGroup(AllConversations.filter((conversation) => conversation.type === "group"));

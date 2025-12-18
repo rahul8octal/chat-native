@@ -1,4 +1,5 @@
 import useAuthStore from "@/store/useAuthStore";
+import useControllerStore from "@/store/useControllerStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -47,10 +48,19 @@ export default function ChatDetail() {
   const requestedRef = useRef({});
   const prevChatRef = useRef(null);
 
+  const selectedChat = useControllerStore((state) => state.selectedChat);
+  const onChatSelect = useControllerStore((state) => state.setSelectedChat);
+
   const chatIdParam = useMemo(
     () => (Array.isArray(params.chatId) ? params.chatId[0] : params.chatId),
     [params.chatId]
   );
+
+  useEffect(() => {
+    if (chatIdParam && !selectedChat) {
+      onChatSelect({ id: chatIdParam, type: params.type || "user" });
+    }
+  }, [chatIdParam, selectedChat, params.type, onChatSelect]);
   const resolvedChatId =
     chatIdParam ||
     extractChatId(conversation) ||
@@ -277,9 +287,10 @@ export default function ChatDetail() {
       item?.senderId ||
       item?.userId ||
       item?.from ||
-      item?.sender?.id;
-    const myId = user?.id;
-    const isMine = myId ? senderId === myId : item?.isMine;
+      item?.sender?.id ||
+      item?.sender?._id;
+    const myId = user?.id || user?._id;
+    const isMine = myId && senderId ? String(senderId) === String(myId) : item?.isMine;
     const body = extractMessageText(item);
     const timestamp = formatMessageTime(
       extractMessageTimestamp(item) ||
