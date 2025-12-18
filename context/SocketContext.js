@@ -113,6 +113,15 @@ export const SocketProvider = ({ children }) => {
   );
 
   useEffect(() => {
+    if (socket && selectedProfileId?.id) {
+      socket.emit("get-profile", {
+        module_id: selectedProfileId.id,
+        type: selectedProfileId.type || "user",
+      });
+    }
+  }, [socket, selectedProfileId]);
+
+  useEffect(() => {
     socket.on("user-conversation", (data) => {
       setProfile(() => {
         const profile = data?.profile;
@@ -268,7 +277,7 @@ export const SocketProvider = ({ children }) => {
     });
 
     socket.on("profile", (data) => {
-      if (selectedProfileId?.id === data.id) {
+      if (data && selectedProfileId?.id === data.id) {
         setSelectedProfileDetail(data);
       }
     });

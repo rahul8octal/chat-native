@@ -37,6 +37,7 @@ export default function ChatDetail() {
     conversation,
     setConversation,
     AllConversations,
+    setSelectedProfileId,
   } = useSocket();
   
   const [text, setText] = useState("");
@@ -360,14 +361,24 @@ export default function ChatDetail() {
   );
 
   const openProfile = () => {
-    router.push({ pathname: "/profile" });
+    if (receiverId) {
+      setSelectedProfileId({ id: receiverId, type: conversationType });
+      router.push({
+        pathname: "/profile",
+        params: { id: receiverId, type: conversationType },
+      });
+    }
+  };
+
+  const handleback = () => {
+    router.push({ pathname: "/home" });
   };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
       
       <View className="flex-row items-center px-4 py-3 border-b border-gray-100">
-        <TouchableOpacity onPress={() => router.back()} className="mr-3">
+        <TouchableOpacity onPress={() => handleback()} className="mr-3">
           <Ionicons name="chevron-back" size={28} color="#16a34a" />
         </TouchableOpacity>
 

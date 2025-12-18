@@ -1,5 +1,5 @@
 import { Ionicons, MaterialIcons, FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { View, Text, TouchableOpacity, Image, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSocket } from "../context/SocketContext";
@@ -26,13 +26,21 @@ const OptionRow = ({ icon, title, subtitle, value, showBorder = true }) => (
 );
 
 export default function Profile() {
-  const { socket, selectedProfileDetail, selectedProfileId } = useSocket();
+  const params = useLocalSearchParams();
+  const { selectedProfileDetail, selectedProfileId, setSelectedProfileId } = useSocket();
 
   useEffect(() => {
-    if (socket && selectedProfileId) {
-      socket.emit("get-profile", { id: selectedProfileId.id });
+    // If we have params but no state (e.g. on refresh), restore the state
+    if (params.id && (!selectedProfileId || selectedProfileId.id !== params.id)) {
+      setSelectedProfileId({ id: params.id, type: params.type || "user" });
     }
-  }, [socket, selectedProfileId]);
+  }, [params.id, params.type, selectedProfileId]);
+
+  const handleback = () => {
+    setSelectedProfileId(null);
+   router.push({ pathname: "/home" });
+  };
+
 
   const profile = selectedProfileDetail || {
     username: "Loading...",
@@ -45,7 +53,7 @@ export default function Profile() {
     <SafeAreaView className="flex-1 bg-gray-50">
       {/* Header */}
       <View className="flex-row px-4 py-3 justify-between bg-white items-center">
-        <TouchableOpacity onPress={() => router.back()} className="mr-3">
+        <TouchableOpacity onPress={() => handleback()} className="mr-3">
           <Ionicons name="chevron-back" size={28} color="#16a34a" />
         </TouchableOpacity>
         <TouchableOpacity>
@@ -96,11 +104,6 @@ export default function Profile() {
           <OptionRow
             icon={<MaterialCommunityIcons name="image-outline" size={24} color="black" />}
             title="Media Visibility"
-          />
-          <OptionRow
-            icon={<MaterialCommunityIcons name="star-outline" size={24} color="black" />}
-            title="Starred Messages"
-            showBorder={false}
           />
         </View>
 
