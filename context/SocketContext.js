@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { unstable_batchedUpdates } from "react-native";
-import socket from "@/lib/socket";
+import socket, { connectSocketWithToken } from "@/lib/socket";
 import useAuthStore from "@/store/useAuthStore";
 import useControllerStore from "@/store/useControllerStore";
 
@@ -23,6 +23,12 @@ export const SocketProvider = ({ children }) => {
     user: {},
     group: {},
   });
+
+  useEffect(() => {
+    if (user) {
+      connectSocketWithToken().catch(console.error);
+    }
+  }, [user]);
 
   useEffect(() => {
     setAllGroup(AllConversations.filter((conversation) => conversation.type === "group"));
@@ -111,6 +117,15 @@ export const SocketProvider = ({ children }) => {
     },
     [profile, user?.id]
   );
+
+  useEffect(() => {
+    if (socket && selectedProfileId?.id) {
+      socket.emit("get-profile", {
+        module_id: selectedProfileId.id,
+        type: selectedProfileId.type || "user",
+      });
+    }
+  }, [socket, selectedProfileId]);
 
   useEffect(() => {
     socket.on("user-conversation", (data) => {
@@ -268,7 +283,7 @@ export const SocketProvider = ({ children }) => {
     });
 
     socket.on("profile", (data) => {
-      if (selectedProfileId?.id === data.id) {
+      if (data && selectedProfileId?.id === data.id) {
         setSelectedProfileDetail(data);
       }
     });

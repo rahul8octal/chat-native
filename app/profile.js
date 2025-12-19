@@ -1,321 +1,155 @@
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { View, Text, TouchableOpacity, Image, FlatList,ScrollView } from "react-native";
+import { Ionicons, MaterialIcons, FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
+import { router, useLocalSearchParams } from "expo-router";
+import { View, Text, TouchableOpacity, Image, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { useSocket } from "../context/SocketContext";
+import { useEffect } from "react";
 
+const ActionButton = ({ icon, label }) => (
+  <View className="border border-gray-300 py-3 px-6 rounded-xl items-center min-w-[85px]">
+    <View className="mb-1">{icon}</View>
+    <Text className="text-gray-600">{label}</Text>
+  </View>
+);
 
-const DATA = [
-  {
-    id: 1,
-    name: "Rahul",
-    message: "Be happy",
-    contact: "95745 15762",
-    url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQU0c3V2uvL-cJ1mHLYvzcol2EJWw8DxMiJIw&s",
-  },
-];
+const OptionRow = ({ icon, title, subtitle, value, showBorder = true }) => (
+  <View className={`mt-2 ${showBorder ? "" : "mb-2"}`}>
+    <View className="py-3 px-6 flex-row gap-4 items-center">
+      <View>{icon}</View>
+      <View className="flex-1">
+        <Text className="text-base text-gray-800">{title}</Text>
+        {subtitle && <Text className="text-gray-500 text-xs">{subtitle}</Text>}
+      </View>
+      {value && <Text className="text-gray-500">{value}</Text>}
+    </View>
+  </View>
+);
 
 export default function Profile() {
-  const Item = ({ data }) => (
-    <View className="items-center  gap-3">
-      <View>
-        <Image
-          source={{
-            uri: data.url,
-          }}
-          className="w-28 h-28 rounded-full bg-gray-200"
-        />
-      </View>
-      <View className="items-center">
-        <Text className="font-semibold text-2xl">{data.name}</Text>
-        <Text className="text-xl">{data.contact}</Text>
-        <Text className="text-xl">{data.message}</Text>
-      </View>
-    </View>
-  );
+  const params = useLocalSearchParams();
+  const { selectedProfileDetail, selectedProfileId, setSelectedProfileId } = useSocket();
+
+  useEffect(() => {
+    // If we have params but no state (e.g. on refresh), restore the state
+    if (params.id && (!selectedProfileId || selectedProfileId.id !== params.id)) {
+      setSelectedProfileId({ id: params.id, type: params.type || "user" });
+    }
+  }, [params.id, params.type, selectedProfileId]);
+
+  const handleback = () => {
+    setSelectedProfileId(null);
+   router.push({ pathname: "/home" });
+  };
+
+
+  const profile = selectedProfileDetail || {
+    username: "Loading...",
+    contact: "",
+    about: "",
+    profile_image: null,
+  };
 
   return (
-    <SafeAreaView className="  ">
-      
-      <View className="flex-row  px-4 py-3  justify-between bg-white">
-        <View>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            className="mr-3 flex-row"
-          >
-            <Ionicons name="chevron-back" size={28} color="#16a34a" />
-          </TouchableOpacity>
-        </View>
+    <SafeAreaView className="flex-1 bg-gray-50">
+      {/* Header */}
+      <View className="flex-row px-4 py-3 justify-between bg-white items-center">
+        <TouchableOpacity onPress={() => handleback()} className="mr-3">
+          <Ionicons name="chevron-back" size={28} color="#16a34a" />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <MaterialCommunityIcons name="dots-vertical" size={24} color="black" />
+        </TouchableOpacity>
+      </View>
 
-        <View className="flex-row ">
-          <TouchableOpacity>
-            <Text>
+      <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
+        {/* Profile Info */}
+        <View className="bg-white items-center pb-6">
+          <Image
+            source={{
+              uri: profile.profile_image || `https://ui-avatars.com/api/?name=${profile.username || "User"}&background=random`,
+            }}
+            className="w-28 h-28 rounded-full bg-gray-200 mb-3"
+          />
+          <Text className="font-semibold text-2xl text-gray-900">{profile.username}</Text>
+          <Text className="text-xl text-gray-600 mt-1">{profile.contact || profile.phone || ""}</Text>
+          {profile.about && <Text className="text-base text-gray-500 mt-1">{profile.about}</Text>}
 
-            <MaterialCommunityIcons
-              name="dots-vertical"
-              size={24}
-              color="black"
+          {/* Actions */}
+          <View className="flex-row mt-6 gap-3 items-center justify-center flex-wrap px-4">
+            <ActionButton
+              icon={<Ionicons name="call-outline" size={25} color="#16a34a" />}
+              label="Audio"
             />
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-
-      <ScrollView>
-
-     
-      <View className="bg-white items-center pb-4">
-        <FlatList
-          data={DATA}
-          renderItem={({ item }) => <Item data={item} />}
-          keyExtractor={(item) => item.id}
-        />
-
-        <View className="flex-row mt-2 gap-3 items-center   ">
-          <View className="border border-gray-300 pt-3 pb-3 pr-6 pl-6 rounded-xl items-center">
-            <View>
-              <Text>
-                <Ionicons name="call-outline" size={25} color="#16a34a" />
-              </Text>
-            </View>
-            <View>
-              <Text>Audio</Text>
-            </View>
-          </View>
-          <View className="border border-gray-300 pt-3 pb-3 pr-6 pl-6 rounded-xl items-center ">
-            <View>
-              <Text>
-                <MaterialCommunityIcons
-                  name="video-outline"
-                  size={26}
-                  color="#16a34a"
-                />
-              </Text>
-            </View>
-            <View>
-              <Text>Video</Text>
-            </View>
-          </View>
-
-          <View className="border border-gray-300 pt-3 pb-3 pr-6 pl-6 rounded-xl items-center">
-            <View>
-              <Text>
-                <FontAwesome name="rupee" size={22} color="#16a34a" />
-              </Text>
-            </View>
-            <View>
-              <Text>Pay</Text>
-            </View>
-          </View>
-          <View className="border border-gray-300 pt-3 pb-3 pr-6 pl-6 rounded-xl items-center">
-            <View>
-              <Text>
-                <Ionicons name="search" size={25} color="#16a34a" />
-              </Text>
-            </View>
-            <View>
-              <Text>Search</Text>
-            </View>
-          </View>
-        </View>
-      </View>
-     
-     
-     
-   
-      <View className="bg-white mt-4">
-        <View className="mt-2 ">
-          <View className="pt-3 pb-3 pr-6 pl-6 flex-row gap-4">
-            <View>
-              <Text>
-                <Ionicons
-                  name="notifications-outline"
-                  size={24}
-                  color="black"
-                />
-              </Text>
-            </View>
-            <View className="flex-row">
-              <Text>Notifications</Text>
-              {/* <Text>2</Text> */}
-            </View>
+            <ActionButton
+              icon={<MaterialCommunityIcons name="video-outline" size={26} color="#16a34a" />}
+              label="Video"
+            />
+            <ActionButton
+              icon={<FontAwesome name="rupee" size={22} color="#16a34a" />}
+              label="Pay"
+            />
+            <ActionButton
+              icon={<Ionicons name="search" size={25} color="#16a34a" />}
+              label="Search"
+            />
           </View>
         </View>
 
-        <View className="mt-2 ">
-          <View className="pt-3 pb-3 pr-6 pl-6 flex-row gap-4">
-            <View>
-              <Text>
-                <MaterialCommunityIcons
-                  name="image-outline"
-                  size={24}
-                  color="black"
-                />
-              </Text>
-            </View>
-            <View>
-              <Text>Media Visibility</Text>
-            </View>
-          </View>
+        {/* Settings Group 1 */}
+        <View className="bg-white mt-4">
+          <OptionRow
+            icon={<Ionicons name="notifications-outline" size={24} color="black" />}
+            title="Notifications"
+          />
+          <OptionRow
+            icon={<MaterialCommunityIcons name="image-outline" size={24} color="black" />}
+            title="Media Visibility"
+          />
         </View>
 
-        <View className="mt-2 ">
-          <View className="pt-3 pb-3 pr-6 pl-6 flex-row gap-4">
-            <View>
-              <Text>
-                <MaterialCommunityIcons
-                  name="star-outline"
-                  size={24}
-                  color="black"
-                />
-              </Text>
-            </View>
-            <View>
-              <Text>Starred Messages</Text>
-            </View>
-          </View>
-        </View>
-      </View>
-
-      <View className="bg-white mt-4 mb-5">
-        <View className="mt-2 mr-4 ">
-          <View className="pt-3 pb-3 pr-6 pl-6 flex-row gap-4">
-            <View>
-              <Text>
-                <MaterialCommunityIcons
-                  name="lock-outline"
-                  size={24}
-                  color="black"
-                />
-              </Text>
-            </View>
-            <View>
-              <Text>Encryption</Text>
-              <Text>Messages and calls are end-to-end encrypted.Tap to varify.</Text>
-            </View>
-          </View>
-        </View>
-    
-        <View className="mt-2  ">
-          <View className="pt-3 pb-3 pr-6 pl-6 flex-row gap-4">
-            <View>
-              <Text>
-                <MaterialCommunityIcons
-                  name="progress-clock"
-                  size={24}
-                  color="black"
-                />
-              </Text>
-            </View>
-            <View>
-              <Text>Disapearing messages</Text>
-              <Text>Off</Text>
-            </View>
-          </View>
-        </View>
-
-        <View className="mt-2 ">
-          <View className="pt-3 pb-3 pr-6 pl-6 flex-row gap-4">
-            <View>
-              <Text>
-                <MaterialCommunityIcons
-                  name="message-text-lock-outline"
-                  size={24}
-                  color="black"
-                />
-              </Text>
-            </View>
-            <View>
-              <Text>Chat Lock</Text>
-              <Text>Lock and hide theschat on thesdevice.</Text>
-            </View>
-          </View>
-        </View>
-        <View className="mt-2 ">
-          <View className="pt-3 pb-3 pr-6 pl-6 flex-row gap-4">
-            <View>
-              <Text>
-                <MaterialIcons name="privacy-tip" size={24} color="black" />
-              </Text>
-            </View>
-            <View>
-              <Text>Advanced Chat privacy</Text>
-              <Text>
-                Off
-              </Text>
-            </View>
-          </View>
-        </View>
-        </View>
+        {/* Settings Group 2 */}
         <View className="bg-white mt-4 mb-5">
-        <View className="mt-2 mr-4 ">
-          <View className="pt-3 pb-3 pr-6 pl-6 flex-row gap-4">
-            <View>
-              <Text>
-                <MaterialCommunityIcons
-                  name="lock-outline"
-                  size={24}
-                  color="black"
-                />
-              </Text>
-            </View>
-            <View>
-              <Text>Add to favourite</Text>
-            </View>
-          </View>
+          <OptionRow
+            icon={<MaterialCommunityIcons name="lock-outline" size={24} color="black" />}
+            title="Encryption"
+            subtitle="Messages and calls are end-to-end encrypted. Tap to verify."
+          />
+          <OptionRow
+            icon={<MaterialCommunityIcons name="progress-clock" size={24} color="black" />}
+            title="Disappearing messages"
+            subtitle="Off"
+          />
+          <OptionRow
+            icon={<MaterialCommunityIcons name="message-text-lock-outline" size={24} color="black" />}
+            title="Chat Lock"
+            subtitle="Lock and hide this chat on this device."
+          />
+          <OptionRow
+            icon={<MaterialIcons name="privacy-tip" size={24} color="black" />}
+            title="Advanced Chat privacy"
+          />
         </View>
 
-        <View className="mt-2  ">
-          <View className="pt-3 pb-3 pr-6 pl-6 flex-row gap-4">
-            <View>
-              <Text>
-                <MaterialCommunityIcons
-                  name="progress-clock"
-                  size={24}
-                  color="black"
-                />
-              </Text>
-            </View>
-            <View>
-              <Text>Add to list </Text>
-            </View>
-          </View>
+        {/* Actions Group 3 */}
+        <View className="bg-white mt-4 mb-5">
+           <OptionRow
+            icon={<MaterialCommunityIcons name="heart-outline" size={24} color="black" />}
+            title="Add to favourite"
+          />
+          <OptionRow
+            icon={<MaterialCommunityIcons name="playlist-plus" size={24} color="black" />}
+            title="Add to list"
+          />
+          <OptionRow
+            icon={<MaterialCommunityIcons name="block-helper" size={24} color="red" />}
+            title={<Text className="text-red-500">Block {profile.username}</Text>}
+          />
+          <OptionRow
+            icon={<MaterialIcons name="report" size={24} color="red" />}
+            title={<Text className="text-red-500">Report {profile.username}</Text>}
+            showBorder={false}
+          />
         </View>
-        <View className="mt-2  ">
-          <View className="pt-3 pb-3 pr-6 pl-6 flex-row gap-4">
-            <View>
-              <Text>
-                <MaterialCommunityIcons
-                  name="progress-clock"
-                  size={24}
-                  color="black"
-                />
-              </Text>
-            </View>
-            <View>
-              <Text>Block </Text>
-            </View>
-          </View>
-        </View>
-        <View className="mt-2  ">
-          <View className="pt-3 pb-3 pr-6 pl-6 flex-row gap-4">
-            <View>
-              <Text>
-                <MaterialCommunityIcons
-                  name="progress-clock"
-                  size={24}
-                  color="black"
-                />
-              </Text>
-            </View>
-            <View>
-              <Text>Report</Text>
-            </View>
-          </View>
-      </View>
-      </View>
       </ScrollView>
     </SafeAreaView>
   );

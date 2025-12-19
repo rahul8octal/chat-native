@@ -1,4 +1,5 @@
 import useAuthStore from "@/store/useAuthStore";
+import useControllerStore from "@/store/useControllerStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -37,6 +38,7 @@ export default function ChatDetail() {
     conversation,
     setConversation,
     AllConversations,
+    setSelectedProfileId,
   } = useSocket();
   
   const [text, setText] = useState("");
@@ -46,10 +48,19 @@ export default function ChatDetail() {
   const requestedRef = useRef({});
   const prevChatRef = useRef(null);
 
+  const selectedChat = useControllerStore((state) => state.selectedChat);
+  const onChatSelect = useControllerStore((state) => state.setSelectedChat);
+
   const chatIdParam = useMemo(
     () => (Array.isArray(params.chatId) ? params.chatId[0] : params.chatId),
     [params.chatId]
   );
+
+  useEffect(() => {
+    if (chatIdParam && !selectedChat) {
+      onChatSelect({ id: chatIdParam, type: params.type || "user" });
+    }
+  }, [chatIdParam, selectedChat, params.type, onChatSelect]);
   const resolvedChatId =
     chatIdParam ||
     extractChatId(conversation) ||
@@ -276,9 +287,10 @@ export default function ChatDetail() {
       item?.senderId ||
       item?.userId ||
       item?.from ||
-      item?.sender?.id;
-    const myId = user?.id;
-    const isMine = myId ? senderId === myId : item?.isMine;
+      item?.sender?.id ||
+      item?.sender?._id;
+    const myId = user?.id || user?._id;
+    const isMine = myId && senderId ? String(senderId) === String(myId) : item?.isMine;
     const body = extractMessageText(item);
     const timestamp = formatMessageTime(
       extractMessageTimestamp(item) ||
@@ -360,14 +372,24 @@ export default function ChatDetail() {
   );
 
   const openProfile = () => {
-    router.push({ pathname: "/profile" });
+    if (receiverId) {
+      setSelectedProfileId({ id: receiverId, type: conversationType });
+      router.push({
+        pathname: "/profile",
+        params: { id: receiverId, type: conversationType },
+      });
+    }
+  };
+
+  const handleback = () => {
+    router.push({ pathname: "/home" });
   };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
       
       <View className="flex-row items-center px-4 py-3 border-b border-gray-100">
-        <TouchableOpacity onPress={() => router.back()} className="mr-3">
+        <TouchableOpacity onPress={() => handleback()} className="mr-3">
           <Ionicons name="chevron-back" size={28} color="#16a34a" />
         </TouchableOpacity>
 

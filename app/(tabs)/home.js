@@ -13,14 +13,13 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSocket } from "../../context/SocketContext";
-import { disconnectSocket } from "../../lib/socket";
+
 import {
   extractChatId,
   formatMessageTime,
   getInitials,
 } from "../../utils/chatHelpers";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { openSettings } from "expo-linking";
 
 const getConversationName = (chat) =>
   chat.group_name || chat.username || "Conversation";
@@ -69,16 +68,13 @@ export default function Home() {
     };
   }, [socket, setAllConversations]);
 
-  const handleLogout = async () => {
-    await disconnectSocket();
-    gotoLogin();
-  };
+ 
 
   const openContacts = () => {
     router.push({ pathname: "/contacts" });
   };
   const openSetting = () => {
-    router.push({ pathname: "../chat/setting" });
+    router.push({ pathname: "/setting" });
   };
 
   const getMessagePreview = useCallback(
@@ -199,7 +195,10 @@ export default function Home() {
     const chatId = chat?.receiver_id;
     if (!chatId) return;
     onChatSelect({ id: chatId, type: chat?.type });
-    router.push({ pathname: "/chat/[chatId]", params: { chatId } });
+    router.push({
+      pathname: "/chat/[chatId]",
+      params: { chatId, type: chat?.type },
+    });
   };
 
   const renderChat = ({ item }) => (
@@ -296,13 +295,7 @@ export default function Home() {
           <TouchableOpacity>
             <Ionicons name="camera-outline" size={24} color="black" />
           </TouchableOpacity>
-          <TouchableOpacity
-            accessibilityRole="button"
-            onPress={handleLogout}
-            className="ml-2 bg-red-50 border border-red-100 px-3 py-1 rounded-full"
-          >
-            <Text className="text-red-600 text-sm font-semibold">Logout</Text>
-          </TouchableOpacity>
+          
           <TouchableOpacity 
                 onPress={() => openSetting()}
           >
