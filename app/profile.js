@@ -71,11 +71,11 @@ export default function Profile() {
             className="w-28 h-28 rounded-full bg-gray-200 mb-3"
           />
           <Text className="font-semibold text-2xl text-gray-900">{profile.username}</Text>
-          <Text className="text-xl text-gray-600 mt-1">{profile.contact || profile.phone || ""}</Text>
-          {profile.about && <Text className="text-base text-gray-500 mt-1">{profile.about}</Text>}
+          <Text className="text-xl text-gray-600 mt-1">{profile.contact || profile.phone || "9574514762"}</Text>
+          {profile.about && <Text className="text-base text-gray-500">{profile.about}</Text>}
 
           {/* Actions */}
-          <View className="flex-row mt-6 gap-3 items-center justify-center flex-wrap px-4">
+          <View className="flex-row mt-6 gap-3 items-center justify-center  px-2">
             <ActionButton
               icon={<Ionicons name="call-outline" size={25} color="#16a34a" />}
               label="Audio"

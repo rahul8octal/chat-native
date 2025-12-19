@@ -1,5 +1,5 @@
 import useAuthStore from "@/store/useAuthStore";
-import { Ionicons, MaterialIcons, MaterialCommunityIcons, FontAwesome5, Feather } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons, MaterialCommunityIcons, FontAwesome5, Feather, FontAwesome } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
 import { View, Text, TouchableOpacity, Image, ScrollView } from "react-native";
@@ -24,7 +24,7 @@ const SETTINGS_OPTIONS = [
       },
       {
         id: "avatar",
-        icon: <MaterialCommunityIcons name="face-woman-shimmer" size={24} color="black" />,
+        icon: <MaterialCommunityIcons name="face-woman-shimmer-outline" size={24} color="black" />,
         title: "Avatar",
         subtitle: "Create, edit, profile photo",
       },
@@ -35,7 +35,7 @@ const SETTINGS_OPTIONS = [
     items: [
       {
         id: "lists",
-        icon: <FontAwesome5 name="users" size={24} color="black" />,
+        icon: <FontAwesome name="users" size={22} color="black" />,
         title: "Lists",
         subtitle: "Manage people and groups",
       },
@@ -112,7 +112,7 @@ export default function Setting() {
           <TouchableOpacity onPress={() => router.back()} className="p-1">
             <Ionicons name="chevron-back" size={28} color="#16a34a" />
           </TouchableOpacity>
-          <Text className="text-2xl ml-2 font-semibold">Settings</Text>
+          <Text className="text-2xl ml-2">Settings</Text>
         </View>
         <TouchableOpacity className="p-1">
           <MaterialCommunityIcons name="dots-vertical" size={24} color="black" />
@@ -131,10 +131,10 @@ export default function Setting() {
             />
             <View className="flex-1">
               <Text className="font-semibold text-2xl" numberOfLines={1}>
-                {user?.name || "User Name"}
+                {user?.name || "Urvisha"}
               </Text>
               <Text className="text-gray-500 text-lg" numberOfLines={1}>
-                {user?.status || "Hey there! I am using WhatsApp."}
+                {user?.status || "Always be happy....."}
               </Text>
             </View>
           </View>
