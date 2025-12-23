@@ -17,7 +17,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 const users = [
   {
     id: 1,
-    name: "Rahul",
+    name: "Ruhi",
     url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSh_-cjB94gnMfuRmPBbRBBpe1ChJXIlba64Q&s",
     background_url:
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVHKpYT5wa34pJmhMakNpAh37DMNX9tyHFMw&s",

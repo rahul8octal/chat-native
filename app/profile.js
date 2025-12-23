@@ -76,79 +76,118 @@ export default function Profile() {
 
           {/* Actions */}
           <View className="flex-row mt-6 gap-3 items-center justify-center  px-2">
+            <TouchableOpacity>
+
             <ActionButton
               icon={<Ionicons name="call-outline" size={25} color="#16a34a" />}
               label="Audio"
             />
+            </TouchableOpacity>
+            <TouchableOpacity>
+
             <ActionButton
               icon={<MaterialCommunityIcons name="video-outline" size={26} color="#16a34a" />}
               label="Video"
             />
+            </TouchableOpacity>
+            <TouchableOpacity>
+
             <ActionButton
               icon={<FontAwesome name="rupee" size={22} color="#16a34a" />}
               label="Pay"
             />
+            </TouchableOpacity>
+            <TouchableOpacity>
+
             <ActionButton
               icon={<Ionicons name="search" size={25} color="#16a34a" />}
               label="Search"
             />
+            </TouchableOpacity>
           </View>
         </View>
 
         {/* Settings Group 1 */}
         <View className="bg-white mt-4">
+          <TouchableOpacity>
+
           <OptionRow
             icon={<Ionicons name="notifications-outline" size={24} color="black" />}
             title="Notifications"
           />
+          </TouchableOpacity>
+          <TouchableOpacity>
+
           <OptionRow
             icon={<MaterialCommunityIcons name="image-outline" size={24} color="black" />}
             title="Media Visibility"
           />
+          </TouchableOpacity>
         </View>
 
         {/* Settings Group 2 */}
         <View className="bg-white mt-4 mb-5">
+          <TouchableOpacity>
           <OptionRow
             icon={<MaterialCommunityIcons name="lock-outline" size={24} color="black" />}
             title="Encryption"
             subtitle="Messages and calls are end-to-end encrypted. Tap to verify."
           />
+          </TouchableOpacity>
+          <TouchableOpacity>
           <OptionRow
             icon={<MaterialCommunityIcons name="progress-clock" size={24} color="black" />}
             title="Disappearing messages"
             subtitle="Off"
-          />
+          /> 
+          </TouchableOpacity>
+         <TouchableOpacity>
+
           <OptionRow
             icon={<MaterialCommunityIcons name="message-text-lock-outline" size={24} color="black" />}
             title="Chat Lock"
             subtitle="Lock and hide this chat on this device."
           />
+         </TouchableOpacity>
+         <TouchableOpacity>
+
           <OptionRow
             icon={<MaterialIcons name="privacy-tip" size={24} color="black" />}
             title="Advanced Chat privacy"
           />
+         </TouchableOpacity>
         </View>
 
         {/* Actions Group 3 */}
         <View className="bg-white mt-4 mb-5">
+          <TouchableOpacity>
            <OptionRow
             icon={<MaterialCommunityIcons name="heart-outline" size={24} color="black" />}
             title="Add to favourite"
-          />
+          /></TouchableOpacity>
+          <TouchableOpacity>
+
           <OptionRow
             icon={<MaterialCommunityIcons name="playlist-plus" size={24} color="black" />}
             title="Add to list"
           />
+          </TouchableOpacity>
+          <TouchableOpacity>
+
           <OptionRow
             icon={<MaterialCommunityIcons name="block-helper" size={24} color="red" />}
             title={<Text className="text-red-500">Block {profile.username}</Text>}
           />
+          </TouchableOpacity>
+          <TouchableOpacity>
+
           <OptionRow
             icon={<MaterialIcons name="report" size={24} color="red" />}
             title={<Text className="text-red-500">Report {profile.username}</Text>}
             showBorder={false}
           />
+          </TouchableOpacity>
+          
         </View>
       </ScrollView>
     </SafeAreaView>

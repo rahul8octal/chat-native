@@ -2,7 +2,7 @@ import useAuthStore from "@/store/useAuthStore";
 import useControllerStore from "@/store/useControllerStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, } from "react";
 import {
   FlatList,
   Image,
@@ -14,12 +14,15 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSocket } from "../../context/SocketContext";
 
+
+
 import {
   extractChatId,
   formatMessageTime,
   getInitials,
 } from "../../utils/chatHelpers";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import Setting from "../setting";
 
 const getConversationName = (chat) =>
   chat.group_name || chat.username || "Conversation";
@@ -56,7 +59,15 @@ export default function Home() {
   const onChatSelect = useControllerStore((state) => state.setSelectedChat);
   const { socket, AllConversations, setAllConversations, setConversation } =
     useSocket();
+    
+    
+    
+    const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState("Select");
 
+  const options = ["Setting"];
+
+ 
   useEffect(() => {
     if (!socket) return;
     socket.emit("get-conversations");
@@ -287,29 +298,55 @@ export default function Home() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
+     
       {/* HEADER */}
       <View className="flex-row items-center justify-between px-4 mt-4">
         <Text className="text-3xl font-bold text-green-700 ml-2">Chats</Text>
 
-        <View className="flex-row space-x-5 items-center">
+        <View className="flex-row  items-center">
+          <View>
+
           <TouchableOpacity>
             <Ionicons name="camera-outline" size={24} color="black" />
           </TouchableOpacity>
+          </View>
           
-          <TouchableOpacity 
-                onPress={() => openSetting()}
-          >
-            <MaterialCommunityIcons
+          <View className="">
+      <TouchableOpacity
+        onPress={() => setOpen(!open)}
+        className=""
+      >
+       
+        <MaterialCommunityIcons
               name="dots-vertical"
               size={24}
               color="black"
             />
-          </TouchableOpacity>
+      </TouchableOpacity>
+
+      {open && (
+        <View className="border rounded-lg  bg-white  opacity-2">
+          
+        
+          {options.map((item, i) => (
+            <TouchableOpacity
+              key={i}
+              onPress={() => openSetting()}
+              className="p-3"
+            >
+              <Text>{item}</Text>
+            </TouchableOpacity>
+          ))}
+        
+          
+        </View>
+      )}
+    </View>
+
         </View>
       </View>
-
-   
-      <View className="mx-4 mt-3 mb-2">
+      
+      <View className="mx-4 mt-3 mb-2 static  opacity-1">
         <View className="flex-row items-center bg-gray-100 rounded-full px-4 py-2">
           <Ionicons name="search-outline" size={20} color="gray" />
           <TextInput
@@ -324,6 +361,7 @@ export default function Home() {
 
       {/* FILTERS */}
       <View className="flex-row items-center px-4 mb-2">
+        
         {filters.map((filter) => (
           <TouchableOpacity
             key={filter}
