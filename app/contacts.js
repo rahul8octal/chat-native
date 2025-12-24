@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Feather, FontAwesome, FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { View, Text, TouchableOpacity, Image, FlatList } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -24,7 +24,9 @@ export default function Contacts() {
         console.log("Selected contact:", data);
       }}
     >
+   
       <View>
+    
         <Image
           source={{
             uri: data.profile_image || `https://ui-avatars.com/api/?name=${data.username || "User"}&background=random`,
@@ -47,10 +49,15 @@ export default function Contacts() {
             onPress={() => router.back()}
             className="mr-3 flex-row items-center"
           >
-            <Ionicons name="chevron-back" size={28} color="#16a34a" />
+            <Feather name="arrow-left" size={24} color="#16a34a" />
+            <View  className="ml-2">
             <Text className="text-xl font-semibold text-green-700">Select Contact</Text>
+            <Text className="">22 contacts</Text>
+            </View>
+           
           </TouchableOpacity>
         </View>
+      
 
         <View className="flex-row gap-4">
           <TouchableOpacity>
@@ -65,7 +72,20 @@ export default function Contacts() {
           </TouchableOpacity>
         </View>
       </View>
-
+      <View className="ml-4">
+          <View className="flex-row  p-3 rounded-xl gap-3  items-center">
+            <Text className=" bg-green-600 p-2  rounded-full"><MaterialIcons name="group-add" size={24} color="white" /></Text>
+            <Text className="">New group</Text>
+          </View>
+          <View className="flex-row  p-3 rounded-xl gap-3  items-center">
+            <Text className=" bg-green-600 p-2  rounded-full"><MaterialIcons name="person-add-alt-1" size={24} color="white" /></Text>
+            <Text className="">New contact</Text>
+          </View>
+          <View className="flex-row  p-3 rounded-xl gap-3  items-center">
+            <Text className=" bg-green-600 p-2  rounded-full"><FontAwesome name="users" size={22} color="white" /></Text>
+            <Text className="">New community</Text>
+          </View>
+        </View>
       <FlatList
         data={contacts}
         renderItem={({ item }) => <Item data={item} />}

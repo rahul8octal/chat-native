@@ -37,7 +37,7 @@ export default function Calls() {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState("Select");
 
-  const options = ["Call", "Schedule", "Favorites"];
+  // const options = ["Call", "Schedule", "Favorites"];
   
   const Item = ({ data }) => (
     <TouchableOpacity>
@@ -75,35 +75,7 @@ export default function Calls() {
           </TouchableOpacity>
 
         </View>
-        <View className="p-4">
-      <TouchableOpacity
-        onPress={() => setOpen(!open)}
-        className="flex-row justify-between items-center border p-3 rounded-lg"
-      >
-        <Text>{selected}</Text>
-        <Ionicons
-          name={open ? "chevron-up" : "chevron-down"}
-          size={20}
-        />
-      </TouchableOpacity>
-
-      {open && (
-        <View className="border rounded-lg mt-2 bg-white">
-          {options.map((item, i) => (
-            <TouchableOpacity
-              key={i}
-              onPress={() => {
-                setSelected(item);
-                setOpen(false);
-              }}
-              className="p-3"
-            >
-              <Text>{item}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
-    </View>
+        
       </View>
       </View>
       <FlatList

@@ -10,6 +10,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSocket } from "../../context/SocketContext";
@@ -65,7 +66,7 @@ export default function Home() {
     const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState("Select");
 
-  const options = ["Setting"];
+  const options = ["New group","New community","Setting"];
 
  
   useEffect(() => {
@@ -299,7 +300,7 @@ export default function Home() {
   return (
     <SafeAreaView className="flex-1 bg-white">
      
-      {/* HEADER */}
+    
       <View className="flex-row items-center justify-between px-4 mt-4">
         <Text className="text-3xl font-bold text-green-700 ml-2">Chats</Text>
 
@@ -325,7 +326,12 @@ export default function Home() {
       </TouchableOpacity>
 
       {open && (
-        <View className="border rounded-lg  bg-white  opacity-2">
+
+<Pressable
+    className="absolute"
+
+  >
+        <View className="border rounded-lg top-40  bg-white absolute right-5    opacity-6   mt-10">
           
         
           {options.map((item, i) => (
@@ -340,13 +346,14 @@ export default function Home() {
         
           
         </View>
+        </Pressable>
       )}
     </View>
 
         </View>
       </View>
       
-      <View className="mx-4 mt-3 mb-2 static  opacity-1">
+      <View className="mx-4 mt-3 mb-2">
         <View className="flex-row items-center bg-gray-100 rounded-full px-4 py-2">
           <Ionicons name="search-outline" size={20} color="gray" />
           <TextInput
