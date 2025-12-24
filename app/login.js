@@ -42,7 +42,7 @@ export default function Login() {
         password,
       });
       if (!res) return;
-      login(res.data.data, res.data?.token || "");
+      login(res.data.user, res.data?.token || "");
       connectSocketWithToken();
       router.replace("/home");
     } catch (err) {

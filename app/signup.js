@@ -15,7 +15,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -23,9 +22,11 @@ import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import Feather from "@expo/vector-icons/Feather";
 import Checkbox from "expo-checkbox";
 import api from "../utils/api";
+import useAuthStore from "@/store/useAuthStore";
 
 export default function Signup() {
   const router = useRouter();
+  const login = useAuthStore((s) => s.login);
   const [showPass, setShowPass] = useState(false);
   const [showPassSecond, setShowPassSecond] = useState(false);
   const [remember, setRemember] = useState(false);
@@ -39,6 +40,7 @@ export default function Signup() {
     location: "",
     profile_picture: null,
   });
+  const [profileImage, setProfileImage] = useState(null);
 
   const [loading, setLoading] = useState(false);
 
@@ -48,9 +50,9 @@ export default function Signup() {
       quality: 0.7,
       allowsEditing: true,
     });
-
     if (!result.canceled && result.assets?.[0]) {
       const asset = result.assets[0];
+      setProfileImage(asset.file);
       setUser((prev) => ({
         ...prev,
         profile_picture: {
@@ -82,8 +84,8 @@ export default function Signup() {
     formData.append("password", user.password);
     formData.append("confirm_password", user.confirm_password);
     formData.append("location", user.location);
-    if (user.profile_picture) {
-      formData.append("profile_picture", user.profile_picture);
+    if (user.profile_picture && profileImage) {
+      formData.append("profile_picture", profileImage);
     }
 
     try {
@@ -93,8 +95,8 @@ export default function Signup() {
         },
       });
 
-      if (response.data.token) {
-        await AsyncStorage.setItem("token", response.data.token);
+      if (response?.data?.token) {
+        login(response.data.user, response.data.token);
       }
 
       Alert.alert("Success", "Signup successfully!");
