@@ -66,8 +66,9 @@ export default function Home() {
     const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState("Select");
 
-  const options = ["New group","New community","Setting"];
-
+  const options = ["Setting"];
+  const options1 = ["New group"];
+  const options2 = ["New community"];
  
   useEffect(() => {
     if (!socket) return;
@@ -80,6 +81,11 @@ export default function Home() {
     };
   }, [socket, setAllConversations]);
 
+
+
+ const openGroup = () => {
+    router.push({ pathname: "/group" });
+  };
  
 
   const openContacts = () => {
@@ -258,14 +264,7 @@ export default function Home() {
 
   const renderContent = () => {
     // if (isInitializing) {
-    //   return (
-    //     <View className="flex-1 items-center justify-center">
-    //       <ActivityIndicator color="#16a34a" />
-    //       <Text className="text-gray-500 text-sm mt-2">Loading chats...</Text>
-    //     </View>
-    //   );
-    // }
-
+   
     if (!filteredChats.length) {
       return (
         <View className="flex-1 items-center justify-center px-6">
@@ -299,62 +298,71 @@ export default function Home() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-     
-    
       <View className="flex-row items-center justify-between px-4 mt-4">
         <Text className="text-3xl font-bold text-green-700 ml-2">Chats</Text>
 
         <View className="flex-row  items-center">
           <View>
-
-          <TouchableOpacity>
-            <Ionicons name="camera-outline" size={24} color="black" />
-          </TouchableOpacity>
-          </View>
-          
-          <View className="">
-      <TouchableOpacity
-        onPress={() => setOpen(!open)}
-        className=""
-      >
-       
-        <MaterialCommunityIcons
-              name="dots-vertical"
-              size={24}
-              color="black"
-            />
-      </TouchableOpacity>
-
-      {open && (
-
-<Pressable
-    className="absolute"
-
-  >
-        <View className="border rounded-lg top-40  bg-white absolute right-5    opacity-6   mt-10">
-          
-        
-          {options.map((item, i) => (
-            <TouchableOpacity
-              key={i}
-              onPress={() => openSetting()}
-              className="p-3"
-            >
-              <Text>{item}</Text>
+            <TouchableOpacity>
+              <Ionicons name="camera-outline" size={24} color="black" />
             </TouchableOpacity>
-          ))}
-        
-          
-        </View>
-        </Pressable>
-      )}
-    </View>
+          </View>
 
+          <View className="relative">
+            <TouchableOpacity onPress={() => setOpen(!open)} className="">
+              <MaterialCommunityIcons
+                name="dots-vertical"
+                size={24}
+                color="black"
+              />
+            </TouchableOpacity>
+
+            {open && (
+              <Pressable className="absolute border rounded-lg top-8  bg-white right-0 w-40 z-50">
+
+                  {options.map((item, i) => (
+                    <TouchableOpacity
+                      key={i}
+                      onPress={() => openSetting()}
+                      
+                      className="p-3"
+                    >
+                      <Text>{item}</Text>
+                    </TouchableOpacity>
+                    
+                  ))}
+
+                    {options1.map((item, i) => (
+                    <TouchableOpacity
+                      key={i}
+                      onPress={() => openGroup()}
+                      
+                      className="p-2"
+                    >
+                      <Text>{item}</Text>
+                    </TouchableOpacity>
+                    
+                  ))}
+                   {options2.map((item, i) => (
+                    <TouchableOpacity
+                      key={i}
+                      onPress={() => openContacts()}
+                      
+                      className="p-2"
+                    >
+                      <Text>{item}</Text>
+                    </TouchableOpacity>
+                    
+                  ))}
+               
+              </Pressable>
+            )}
+          </View>
         </View>
       </View>
-      
+
       <View className="mx-4 mt-3 mb-2">
-        <View className="flex-row items-center bg-gray-100 rounded-full px-4 py-2">
+        <View className="flex-row items-center bg-gray-100 rounded-full px-4 py-2 opacity-1">
           <Ionicons name="search-outline" size={20} color="gray" />
           <TextInput
             placeholder="Search chats"
@@ -366,13 +374,11 @@ export default function Home() {
         </View>
       </View>
 
-      {/* FILTERS */}
       <View className="flex-row items-center px-4 mb-2">
-        
         {filters.map((filter) => (
           <TouchableOpacity
             key={filter}
-            onPress={() => setActiveFilter(filter)}
+            onPress={() => setActiveFilter()}
             className={`px-4 py-2 rounded-full mr-2 border h-10 ${
               activeFilter === filter
                 ? "bg-green-600 border-green-700"
