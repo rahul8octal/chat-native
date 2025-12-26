@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 
 export default function TabsLayout() {
   return (
@@ -22,12 +22,21 @@ export default function TabsLayout() {
           )
         }}
       />
+       <Tabs.Screen
+        name="community"
+        options={{
+          title: "Community",
+          tabBarIcon: ({ color, size }) => (
+            <FontAwesome5 name="users" size={24} color={color} />
+          )
+        }}
+      />
       <Tabs.Screen
         name="calls"
         options={{
           title: "Calls",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="call-outline" size={size} color={color} />
+            <Ionicons name="call-outline" size={24} color={color} />
           )
         }}
       />
